@@ -1,0 +1,423 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { DmdvkiemtoanForm } from './dmdvkiemtoan-form.component';
+
+import { DmdvkiemtoanService } from './dmdvkiemtoan.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { Dmdvkiemtoan } from './Dmdvkiemtoan';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { District } from '../district/district';
+import { DistrictService } from '../district/district.service';
+import { ProvinceService } from '../province/province.service';
+import { Province } from '../province/Province';
+import { Ward } from '../ward/ward';
+import { Nation } from '../nation/nation';
+import { Organization } from '../organization/organization';
+import { WardService } from '../ward/ward.service';
+import { NationService } from '../nation/nation.service';
+import { OrganizationService } from '../organization/organization.service';
+import { PageInfo } from '../../../common/util/page-info';
+
+@Component({
+    selector: 'app-dmdvkiemtoan-list',
+    templateUrl: './dmdvkiemtoan-list.component.html',
+    providers: [DmdvkiemtoanService, DialogService, DataTable, DistrictService,
+        ProvinceService, WardService, NationService, OrganizationService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'Dmdvkiemtoan'
+ */
+export class DmdvkiemtoanListComponent implements OnInit {
+    // dmdvkiemtoan page
+    dmdvkiemtoanInfo: PageInfo<Dmdvkiemtoan[]>;
+    // list dmdvkiemtoan 
+    dmdvkiemtoans: Dmdvkiemtoan[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page size
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: Dmdvkiemtoan;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listLoaiDonVi = [
+        { id: "DON_VI_DAU_MOI", name: "Đơn vị đầu mối" },
+        { id: "DON_VI_DUOC_KIEM_TOAN", name: "Đơn vị được kiểm toán" }
+    ]
+
+    listDistrict: District[];
+    districtSelections: Array<any> = [];
+
+    listProvince: Province[];
+    provinceSelections: Array<any> = [];
+
+    listWard: Ward[];
+    wardSelections: Array<any> = [];
+
+    listNation: Nation[];
+    nationSelections: Array<any> = [];
+
+    listOrganization: Organization[];
+    organizationSelections: Array<any> = [];
+
+    constructor(
+        private dmdvkiemtoanService: DmdvkiemtoanService,
+        private districtService: DistrictService,
+        private provinceService: ProvinceService,
+        private wardService: WardService,
+        private nationService: NationService,
+        private organizationService: OrganizationService,
+        private dialogService: DialogService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) { this.toastr.setRootViewContainerRef(vcr); }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = DmdvkiemtoanForm.dmdvkiemtoanForm(this.fb, '');
+        // initialize object
+        this.searchObject = new Dmdvkiemtoan();
+        // set warl level
+        this.searchObject.loaiDonVi = '';
+        // get list district
+        this.getListDistrict();
+        // get list province
+        this.getListProvince();
+        // get datas.
+        this.getPageDmdvkiemtoan(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param dmdvkiemtoan: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageDmdvkiemtoan(dmdvkiemtoan: Dmdvkiemtoan, page: number) {
+        this.searchObject = dmdvkiemtoan;
+        this.dmdvkiemtoanService.getPageDmdvkiemtoan(dmdvkiemtoan, page)
+            .then(response => {
+                this.dmdvkiemtoanInfo = response.data;
+                this.dmdvkiemtoans = this.dmdvkiemtoanInfo.content;
+                this.pageLength = this.dmdvkiemtoanInfo.content.length;
+                this.totalElements = this.dmdvkiemtoanInfo.totalElements;
+                this.totalPages = this.dmdvkiemtoanInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page: number) {
+        debugger;
+        var flag = false;
+        if (this.currentPage >= page && this.dmdvkiemtoanInfo.first == false) {
+            flag = true;
+        }
+        if (this.currentPage <= page && this.dmdvkiemtoanInfo.last == false) {
+            flag = true;
+        }
+        if (flag == true) {
+            this.currentPage = page;
+            this.getPageDmdvkiemtoan(this.searchObject, this.currentPage);
+        }
+    }
+    private setCurrentPage() {
+        if (this.dmdvkiemtoanInfo.numberOfElements > 0) {
+            this.currentPageView = this.dmdvkiemtoanInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.dmdvkiemtoanInfo.numberOfElements;
+        var size = this.dmdvkiemtoanInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param dmdvkiemtoanId 
+     */
+    delete(id: number) {
+        var entityIds = [];
+        entityIds.push(id);
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.dmdvkiemtoanService.deleteDmdvkiemtoansById(entityIds)
+                        .then(response => {
+                            debugger;
+                            let message;
+                            this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.success('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                            this.getPageDmdvkiemtoan(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.dmdvkiemtoans.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.dmdvkiemtoans.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+        if (entityIds.length > 0) {
+            this.dialogService.confirm()
+                .subscribe(response => {
+                    if (response == true) {
+                        this.dmdvkiemtoanService.deleteDmdvkiemtoansById(entityIds)
+                            .then(response => {
+                                let message;
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.checkAllItemFlag = false;
+                                this.getPageDmdvkiemtoan(this.searchObject, this.currentPage);
+                                this.numberDeleteItems = 0;
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            })
+                            .catch(error => {
+                                let message;
+                                this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.numberDeleteItems = 0;
+                                this.checkAllItemFlag = false;
+                                this.getPageDmdvkiemtoan(this.searchObject, this.currentPage);
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            });
+                    }
+                })
+        }
+    }
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.dmdvkiemtoans.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+
+    private getListDistrict() {
+        this.districtService.getListDistrict()
+            .then(response => {
+                this.listDistrict = response.data;
+                this.initializeDistrictSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeDistrictSelection() {
+        let dmdvkiemtoan_datas = [];
+        if (this.listDistrict != null && this.listDistrict != undefined) {
+            this.listDistrict.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.districtName;
+                item.id = element.id;
+                dmdvkiemtoan_datas.push(item);
+            });
+        }
+        this.districtSelections = dmdvkiemtoan_datas;
+        console.log(this.districtSelections);
+    }
+
+    private getListProvince() {
+        this.provinceService.getListProvince()
+            .then(response => {
+                this.listProvince = response.data;
+                this.initializeProvinceSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeProvinceSelection() {
+        let dmdvkiemtoan_datas = [];
+        if (this.listProvince != null && this.listProvince != undefined) {
+            this.listProvince.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.provinceName;
+                item.id = element.id;
+                dmdvkiemtoan_datas.push(item);
+            });
+        }
+        this.provinceSelections = dmdvkiemtoan_datas;
+        console.log(this.provinceSelections);
+    }
+
+    private getListWard() {
+        this.wardService.getListWard()
+            .then(response => {
+                this.listWard = response.data;
+                this.initializeWardSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeWardSelection() {
+        let dmdvkiemtoan_datas = [];
+        if (this.listWard != null && this.listWard != undefined) {
+            this.listWard.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.wardName;
+                item.id = element.id;
+                dmdvkiemtoan_datas.push(item);
+            });
+        }
+        this.wardSelections = dmdvkiemtoan_datas;
+        console.log(this.wardSelections);
+    }
+
+    private getListNation() {
+        this.nationService.getListNation()
+            .then(response => {
+                this.listNation = response.data;
+                this.initializeNationSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeNationSelection() {
+        let dmdvkiemtoan_datas = [];
+        if (this.listNation != null && this.listNation != undefined) {
+            this.listNation.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.nationName;
+                item.id = element.id;
+                dmdvkiemtoan_datas.push(item);
+            });
+        }
+        this.nationSelections = dmdvkiemtoan_datas;
+        console.log(this.nationSelections);
+    }
+
+    private getListOrganization() {
+        this.organizationService.getListOrganization()
+            .then(response => {
+                this.listOrganization = response.data;
+                this.initializeOrganizationSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeOrganizationSelection() {
+        let dmdvkiemtoan_datas = [];
+        if (this.listOrganization != null && this.listOrganization != undefined) {
+            this.listOrganization.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.organizationName;
+                item.id = element.id;
+                dmdvkiemtoan_datas.push(item);
+            });
+        }
+        this.organizationSelections = dmdvkiemtoan_datas;
+        console.log(this.organizationSelections);
+    }
+
+}

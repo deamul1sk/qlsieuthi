@@ -1,0 +1,159 @@
+import { Injectable } from '@angular/core';
+import { Http, Headers } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+
+import { Constants } from '../../../common/util/constants';
+import { Dmdvkiemtoan } from './Dmdvkiemtoan';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../authentication/guard/authentication.service';
+import { CommonService } from '../../../common/util/common-service/common.service';
+import { HeaderField } from '../../../common/util/header-field';
+import { HeaderValue } from '../../../common/util/header-value';
+
+/**
+ * Examine the handling  of business requirements with Dmdvkiemtoan module
+ */
+@Injectable()
+export class DmdvkiemtoanService extends CommonService {
+
+    /**  the api url */
+    DmdvkiemtoanApi = Constants.API_URL + "dmdvkiemtoans";
+
+    constructor(
+        private http: Http,
+        router: Router
+    ) {
+        super(router)
+    }
+
+    /**
+     * @description create a new dmdvkiemtoan
+     * @param dmdvkiemtoan the new dmdvkiemtoan
+     */
+    create(dmdvkiemtoan: Dmdvkiemtoan): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.DmdvkiemtoanApi,
+            JSON.stringify(dmdvkiemtoan), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description update the dmdvkiemtoan
+     * @param dmdvkiemtoan the new dmdvkiemtoan
+     */
+    update(dmdvkiemtoan: Dmdvkiemtoan): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.put(this.DmdvkiemtoanApi,
+            JSON.stringify(dmdvkiemtoan), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description delete dmdvkiemtoans by id
+     * @param entityIds the list id 
+     */
+    deleteDmdvkiemtoansById(entityIds: number[]): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        var test = JSON.stringify(entityIds);
+        var promise = this.http.delete(this.DmdvkiemtoanApi + "/delete-multiple/"+ entityIds, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+    
+    /**
+   * @description get page dmdvkiemtoan
+   * @param dmdvkiemtoan the search restriction
+   * @param page the paging restriction
+   */
+    getPageDmdvkiemtoan(dmdvkiemtoan: Dmdvkiemtoan, page: number): Promise<any> {
+        debugger;
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.DmdvkiemtoanApi + "/search?page=" + page + "&size=" + Constants.PAGE_SIZE,
+            dmdvkiemtoan, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list dmdvkiemtoan
+     */
+    getListDmdvkiemtoan(): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.DmdvkiemtoanApi + "/advance-search?type=-1", new Object, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list dmdvkiemtoan by level
+     */
+    getListDmdvkiemtoanByLevel(level: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.DmdvkiemtoanApi + "/level/" + level, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description hàm trả về thông tin 1 Dmdvkiemtoan
+     * @param id id của Dmdvkiemtoan
+     */
+    findOne(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.DmdvkiemtoanApi + "/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+}

@@ -1,0 +1,6 @@
+<div style="min-width: 400px;">
+	<p>{{ 'Message.ConfirmInfo' | translate }}</p>
+	<p>{{ 'Message.MessageConfirm' | translate }}</p>
+	<div style="width: 100%; text-align: right;"> <button type="button" md-button (click)="dialogRef.close(true)">{{ 'Action.OK' | translate }}</button>
+		<button type="button" md-raised-button (click)="dialogRef.close()">{{ 'Action.Cancel' | translate }}</button></div>
+</div>

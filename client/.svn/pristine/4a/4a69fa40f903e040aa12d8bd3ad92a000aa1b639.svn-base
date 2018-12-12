@@ -1,0 +1,317 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { DistrictForm } from './district-form.component';
+
+import { DistrictService } from './district.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { District } from './District';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { Province } from '../province/province';
+import { ProvinceService } from '../province/province.service';
+import { PageInfo } from '../../../common/util/page-info';
+import { ExcelExportService } from '../../../common/util/common-service/excel.service';
+
+@Component({
+    selector: 'app-district-list',
+    templateUrl: './district-list.component.html',
+    providers: [DistrictService, DialogService, DataTable, ProvinceService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'District'
+ */
+export class DistrictListComponent implements OnInit {
+    // district page
+    districtInfo: PageInfo<District[]>;
+    // list district 
+    districts: District[];
+    //> list district to export excel
+    districtsToExport: District[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page sizw
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: District;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listProvince: Province[];
+
+    provinceSelections: Array<any> = [];
+
+    constructor(
+        private districtService: DistrictService,
+        private provinceService: ProvinceService,
+        private dialogService: DialogService,
+        private exportExcelService: ExcelExportService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) 
+    { 
+        this.toastr.setRootViewContainerRef(vcr); 
+        this.exportExcelService = exportExcelService;
+    }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = DistrictForm.districtForm(this.fb, '');
+        // initialize object
+        this.searchObject = new District();
+        // get list province
+        this.getListProvince();
+        // get datas.
+        this.getPageDistrict(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param district: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageDistrict(district: District, page: number) {
+        this.searchObject = district;
+        this.districtService.getPageDistrict(district, page)
+            .then(response => {
+                this.districtInfo = response.data;
+                this.districts = this.districtInfo.content;
+                this.pageLength = this.districtInfo.content.length;
+                this.totalElements = this.districtInfo.totalElements;
+                this.totalPages = this.districtInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page: number) {
+        debugger;
+        var flag = false;
+        if (this.currentPage >= page && this.districtInfo.first == false) {
+            flag = true;
+        }
+        if (this.currentPage <= page && this.districtInfo.last == false) {
+            flag = true;
+        }
+        if (flag == true) {
+            this.currentPage = page;
+            this.getPageDistrict(this.searchObject, this.currentPage);
+        }
+    }
+    private setCurrentPage() {
+        if (this.districtInfo.numberOfElements > 0) {
+            this.currentPageView = this.districtInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.districtInfo.numberOfElements;
+        var size = this.districtInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param districtId 
+     */
+    delete(entityIds: number[]) {
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.districtService.deleteDistrictsById(entityIds)
+                        .then(response => {
+                            let message;
+                            if (response.code == 200) {
+                               
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            } else if (response.code == 400) {
+                                this.translate.get('Message.DeleteFail400').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            }
+                            
+                            this.getPageDistrict(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.districts.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: put the objects into the object list will be deleted
+     *              Delete list object
+     * @param countryId the id of object
+     */
+    deleteOneItem(id: number) {
+        var entityIds = [];
+        entityIds.push(id);
+        this.delete(entityIds);
+
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.districts.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+
+        if (entityIds.length > 0) {
+            this.delete(entityIds);
+        }
+    }
+
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.districts.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+
+    private getListProvince() {
+        this.provinceService.getListProvince()
+            .then(response => {
+                this.listProvince = response.data;
+                this.initializeProvinceSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeProvinceSelection() {
+        let district_datas = [];
+        if(this.listProvince!=null&&this.listProvince!=undefined){
+            this.listProvince.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.provinceName;
+                item.id = element.id;
+                district_datas.push(item);
+            });
+        }
+        this.provinceSelections = district_datas;
+        console.log(this.provinceSelections);
+    }
+
+    /**
+     * @description: export list district to excel
+     */
+    exportFileExcel() {
+        this.districtService.getListDistrictToExport()
+            .then(res => {
+                this.districtsToExport = JSON.parse(JSON.stringify(res.data));
+                this.exportExcelService.exportAsExcelFile(this.districtsToExport, Constants.DISTRICT_EXCEL);
+                let message;
+                this.translate.get('Message.ExportSuccess').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.success('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+            .catch(err => {
+                let message;
+                this.translate.get('Message.ExportError').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.error('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+
+    }
+}

@@ -1,0 +1,50 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { ReportForm } from './reportForm';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class ReportFormForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static reportFormForm(fb: FormBuilder, business: string): FormGroup {
+        var reportFormForm: FormGroup;
+        
+        reportFormForm = fb.group({
+            id: "",
+            reportFormCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(20),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            reportFormName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(150),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+        });
+        return reportFormForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param reportForm : đối tượng đích
+     */
+    static bindingData(reportFormForm: FormGroup, reportForm: ReportForm) {
+        debugger;
+        reportFormForm.setValue({
+            id: reportForm.id,
+            reportFormCode: reportForm.reportFormCode,
+            reportFormName: reportForm.reportFormName,
+            status: reportForm.status
+        });
+    }
+}

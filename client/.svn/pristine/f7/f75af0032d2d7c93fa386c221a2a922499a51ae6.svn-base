@@ -1,0 +1,330 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { WardService } from '../ward.service';
+import { WardForm } from '../ward-form.component';
+import { District } from '../../district/district';
+import { DistrictService } from '../../district/district.service';
+import { Constants } from '../../../../common/util/constants';
+import { Province } from '../../province/Province';
+import { ProvinceService } from '../../province/province.service';
+
+@Component({
+  selector: 'app-ward-business',
+  templateUrl: './ward-business.component.html',
+  providers: [WardService, DistrictService, ProvinceService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class WardBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  wardForm: FormGroup;
+  ward: any;
+
+  isUpdate: boolean = true;
+
+  listDistrict: District[];
+  districtSelections: Array<any> = [];
+  indexDistrictSelection: number;
+
+  listProvince: Province[];
+  provinceSelections: Array<any> = [];
+  indexProvinceSelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  listWardLevel = [
+    { id: 0, name: 'Phường' },
+    { id: 1, name: 'Xã' },
+    { id: 2, name: 'Thị trấn' }
+  ];
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private wardService: WardService,
+    private districtService: DistrictService,
+    private provinceService: ProvinceService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.wardForm = WardForm.wardForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.wardForm.patchValue({
+          wardLevel: '0',
+        });
+        this.isUpdate = false;
+        this.getListDistrict();
+        this.getListProvince();
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.wardForm, this.id);
+      }
+    });
+  }
+
+  isEqualOld(thenew, type) {
+    try {
+      var old;
+      if(type == "code") {
+        old = this.ward.wardCode;
+      } else if(type == "name") {
+        old = this.ward.wardName;
+      }
+      if(old != thenew && old == this.standardized(thenew, type)) {
+        return false;
+      } else return true;
+    } catch(e) {}
+  }
+  standardized(thenew, type) {
+    thenew = thenew.trim();
+    if(type == "code") {
+      thenew = thenew.split(" ").join("");
+    } else {
+      // console.log('xsa');
+      thenew = thenew.replace(/\s+/g, ' ');
+    }
+    return thenew;
+  }
+
+  bindingData(wardForm, id) {
+    this.wardService.findOne(id)
+      .then(response => {
+        this.ward = response.data;
+        this.getListDistrict();
+        this.getListProvince();
+        WardForm.bindingData(wardForm, this.ward);
+
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param ward : truyền object cần chỉnh sửa.
+   */
+  submit(ward) {
+    if (this.isUpdate) {
+      this.updateWard(ward);
+    } else {
+      this.createWard(ward);
+    }
+  }
+
+  createWard(ward) {
+    this.wardService.create(ward)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateWard(ward) {
+    this.wardService.update(ward)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.wardForm.get('wardCode').invalid) {
+      if (this.wardForm.get('wardCode').errors.required) {
+        return false;
+      }
+      if (this.wardForm.get('wardCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.wardForm.get('wardCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    if(!this.wardForm.get('wardCode').invalid) {
+      if (this.wardForm.get('wardCode').value.trim() == '') {
+        return false;
+      }
+    }
+    // check ward name is valid
+    if (this.wardForm.get('wardName').invalid) {
+      if (this.wardForm.get('wardName').errors.required) {
+        return false;
+      }
+      if (this.wardForm.get('wardName').errors.pattern != null) {
+        return false;
+      }
+      if (this.wardForm.get('wardName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check district is valid
+    if (this.wardForm.get('district.id').invalid) {
+      if (this.wardForm.get('district.id').errors.required) {
+        return false;
+      }
+      if (this.wardForm.get('district.id').errors.min != null) {
+        return false;
+      }
+    }
+    // check province is valid
+    if (this.wardForm.get('province.id').invalid) {
+      if (this.wardForm.get('province.id').errors.required) {
+        return false;
+      }
+      if (this.wardForm.get('province.id').errors.min != null) {
+        return false;
+      }
+    }
+    // check district is valid
+    if (this.wardForm.get('countNumber').invalid) {
+      if (this.wardForm.get('countNumber').errors.min != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private getListDistrict() {
+    this.districtService.getListDistrict()
+      .then(response => {
+        this.listDistrict = response.data;
+        if (this.ward != undefined && this.ward != null) {
+          this.initializeDistrictSelection(this.ward.district.id);
+        } else {
+          this.initializeDistrictSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private getListDistrictByProvinceId(id) {
+    this.districtService.getListDistrictByProvinceId(id)
+      .then(response => {
+        debugger;
+        this.listDistrict = response.data;
+        this.initializeDistrictSelection(0);
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeDistrictSelection(selectItem: number) {
+    let district_datas = [];
+    var countItems = 0;
+    if (this.listDistrict != null && this.listDistrict != undefined) {
+      this.indexDistrictSelection = null;
+      this.listDistrict.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.districtName;
+        item.id = element.id;
+        district_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexDistrictSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.districtSelections = district_datas;
+    console.log(this.districtSelections);
+  }
+
+  districtChanged(id: number) {
+    this.wardForm.get('district.id').setValue(id);
+    this.districtService.findOne(id)
+      .then(response => {
+        this.initializeProvinceSelection(response.data.province.id);
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private getListProvince() {
+    this.provinceService.getListProvince()
+      .then(response => {
+        this.listProvince = response.data;
+        if (this.ward != undefined && this.ward != null) {
+          this.initializeProvinceSelection(this.ward.province.id);
+        } else {
+          this.initializeProvinceSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeProvinceSelection(selectItem: number) {
+    let province_datas = [];
+    var countItems = 0;
+    if (this.listProvince != null && this.listProvince != undefined) {
+      this.listProvince.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.provinceName;
+        item.id = element.id;
+        province_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexProvinceSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.provinceSelections = province_datas;
+    console.log(this.provinceSelections);
+  }
+
+  provinceChanged(id: number) {
+    this.wardForm.get('province.id').setValue(id);
+    this.getListDistrictByProvinceId(id);
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

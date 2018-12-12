@@ -1,0 +1,63 @@
+import { Province } from '../../categories/province/Province';
+import { District } from '../../categories/district/district';
+import { Ward } from '../../categories/ward/ward';
+import { Nation } from '../../categories/nation/nation';
+import { Organization } from '../../categories/organization/organization';
+import { Religion } from '../../categories/religion/religion';
+import { Position } from '../../categories/position/position';
+
+/** 
+ * 
+*/
+export class User {
+    /** the id of the user */
+    userId: number;
+    /** the version of the data */
+    version: number;
+    /** the province of the user */
+    province: Province;
+    /** the district of the user */
+    district: District;
+    /** the ward of the user */
+    ward: Ward;
+    /** the nation of the user */
+    nation: Nation;
+    /** the Religion of the user */
+    religion: Religion
+    /** the Position of the user */
+    position: Position
+    /** the organization of the user */
+    organization: Organization;
+    /** the code of the user */
+    usercode: string;
+    /** the name of the user */
+    username: string;
+    /** the birthday of the user */
+    dob: string;
+    /** the status of the user */
+    accStatus: string;
+    /** the address of the user */
+    address: string;
+    /** the phone number of the user */
+    phoneNumber: string;
+    /** the email of the user */
+    email: string;
+    /** the identify card of the user */
+    identifyCard: string;
+    /** the ktv card number card of the user */
+    ktvCardNumber: string;
+    /** the level of the user */
+    userLevel: number;
+    /** the user Gender of the user */
+    userGender: string;
+    /** the last login of the user */
+    lastLogin: string;
+    /** the date modified of the user */
+    modified: string;
+    /** the modifier of the user */
+    modifier: string;
+    /** check mark*/
+    checked: boolean;
+
+    organizationId: number;
+}

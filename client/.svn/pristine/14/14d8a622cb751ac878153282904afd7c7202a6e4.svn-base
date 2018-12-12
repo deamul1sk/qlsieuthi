@@ -1,0 +1,21 @@
+/** 
+ * 
+*/
+export class Nation {
+    /** the id of the nation */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the nation */
+    nationCode: string;
+    /** the name of the nation */
+    nationName: string;
+    /** the english name of the nation */
+    modified: string;
+    /** the modifier of the nation */
+    modifier: string;
+    /** the status of the nation */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

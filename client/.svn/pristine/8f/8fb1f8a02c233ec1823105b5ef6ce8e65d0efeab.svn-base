@@ -1,0 +1,131 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Country' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Country' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="countryForm" (ngSubmit)="submit(countryForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="countryCode">{{ 'Country.CountryCode' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="countryCode" autocomplete="off" type="text" class="form-control" formControlName="countryCode" placeholder="{{ 'Country.CountryCode' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="countryForm.get('countryCode').invalid && (countryForm.get('countryCode').touched)">
+                                                <span *ngIf="countryForm.get('countryCode').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="isUpdate===false && !countryForm.get('countryCode').errors.required&&countryForm.get('countryCode').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!countryForm.get('countryCode').errors.required&&countryForm.get('countryCode').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 20
+                                                </span>
+                                            </small>
+                                            <!-- {{isEqualCodeOld(countryForm.get('countryCode').value)}} -->
+                                            <small class="error" *ngIf="!countryForm.get('countryCode').invalid && (countryForm.get('countryCode').touched)">
+                                                <span *ngIf="countryForm.get('countryCode').value.trim() == ''">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="isUpdate===true && !isEqualOld(countryForm.get('countryCode').value, 'code')">
+                                                    {{ 'Message.Same' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="countryName">{{ 'Country.CountryName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="countryName" autocomplete="off" type="text" class="form-control" formControlName="countryName" placeholder="{{ 'Country.CountryName' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="countryForm.get('countryName').invalid && (countryForm.get('countryName').touched)">
+                                                <span *ngIf="countryForm.get('countryName').errors.required||countryForm.get('countryName').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!countryForm.get('countryName').errors.required&&countryForm.get('countryName').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 50
+                                                </span>
+                                            </small>
+                                            <small class="error" *ngIf="!countryForm.get('countryName').invalid && (countryForm.get('countryName').touched)">
+                                                <span *ngIf="isUpdate===true && !isEqualOld(countryForm.get('countryName').value, 'name')">
+                                                    {{ 'Message.Same' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="englishName">{{ 'Country.EnglishName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="englishName" autocomplete="off" type="text" class="form-control" formControlName="englishName" placeholder="{{ 'Country.EnglishName' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="countryForm.get('englishName').invalid && (countryForm.get('englishName').touched)">
+                                                <span *ngIf="countryForm.get('englishName').errors.required||countryForm.get('englishName').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!countryForm.get('englishName').errors.required&&countryForm.get('englishName').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 50
+                                                </span>
+                                            </small>
+                                            <small class="error" *ngIf="!countryForm.get('englishName').invalid && (countryForm.get('englishName').touched)">
+                                                <span *ngIf="isUpdate===true && !isEqualOld(countryForm.get('englishName').value, 'english')">
+                                                    {{ 'Message.Same' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" *ngIf="isUpdate===true">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="status">{{'Country.Status'|translate}}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <select class="form-control" formControlName="status" autofocus>
+                                                <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                                            </select>
+                                            <small class="error" *ngIf="countryForm.get('status').invalid 
+                                  && (countryForm.get('status').touched)">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

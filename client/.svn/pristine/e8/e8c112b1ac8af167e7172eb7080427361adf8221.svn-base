@@ -1,0 +1,59 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Currency } from './currency';
+import { Country } from '../country/country';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class CurrencyForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static currencyForm(fb: FormBuilder, business: string): FormGroup {
+        var currencyForm: FormGroup;
+
+        currencyForm = fb.group({
+            id: "",
+            currencyCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            currencyName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(50),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            country: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+        });
+        return currencyForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param currency : đối tượng đích
+     */
+    static bindingData(currencyForm: FormGroup, currency: Currency) {
+        currencyForm.setValue({
+            id: currency.id,
+            currencyCode: currency.currencyCode,
+            currencyName: currency.currencyName,
+            status: currency.status,
+            country: {
+                id: currency.country.id
+            }
+        });
+    }
+}

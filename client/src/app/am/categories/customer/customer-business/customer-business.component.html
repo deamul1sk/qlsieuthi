@@ -1,0 +1,93 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Customer.Title' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Customer.Title' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="customerForm" (ngSubmit)="submit(customerForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="code">{{ 'Customer.Code' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="code" type="text" ng-trim="true" class="form-control" formControlName="code" placeholder="{{ 'Customer.Code' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="customerForm.get('code').invalid && (customerForm.get('code').touched)">
+                                                <span *ngIf="customerForm.get('code').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!customerForm.get('code').errors.required&&customerForm.get('code').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!customerForm.get('code').errors.required&&customerForm.get('code').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 10
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'Customer.Name' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="name" type="text" class="form-control" formControlName="name" placeholder="{{ 'Customer.Name' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="customerForm.get('name').invalid && (customerForm.get('name').touched)">
+                                                <span *ngIf="customerForm.get('name').errors.required||customerForm.get('name').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!customerForm.get('name').errors.required&&customerForm.get('name').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'Customer.Phone' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="phone" type="text" class="form-control" formControlName="phone" placeholder="{{ 'Customer.Phone' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="customerForm.get('phone').invalid && (customerForm.get('phone').touched)">
+                                                <span *ngIf="customerForm.get('phone').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                                <span *ngIf="customerForm.get('phone').errors.pattern!=null">
+                                                    {{ 'Message.UserNameInvalid' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

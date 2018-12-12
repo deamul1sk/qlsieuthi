@@ -1,0 +1,31 @@
+import { Province } from '../province/province';
+import { District } from '../district/district';
+/** 
+ * 
+*/
+export class Ward {
+    /** the id of the ward */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the province of the ward */
+    province: Province;
+    /** the province of the ward */
+    district: District;
+    /** the code of the ward */
+    wardCode: string;
+    /** the name of the ward */
+    wardName: string;
+    /** the level of the ward */
+    wardLevel: number;
+    /** the count number of the ward */
+    countNumber: number;
+    /** the date modified of the ward */
+    modified: string;
+    /** the modifier of the ward */
+    modifier: string;
+    /** the status of the ward */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

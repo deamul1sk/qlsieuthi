@@ -1,0 +1,94 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Dmdvkiemtoan' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.MaDonVi'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.maDonVi}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.TenDonVi'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.tenDonVi}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Province.Title'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.province.provinceName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'District.Title'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.district.districtName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Ward.Title'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.ward.wardName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Nation.Title'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.nation.nationName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Organization.Title'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.organization.organizationName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.DiaChi'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.diaChi}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.NguoiDaiDien'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.nguoiDaiDien}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.SoDienThoai'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.soDienThoai}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.Email'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.email}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.Fax'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.fax}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.Modifier'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.modifier}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.Version'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.version}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Dmdvkiemtoan.Status'|translate}}</label>
+                                        <div class="col-md-8">{{dmdvkiemtoan?.status==1?'Active':'Inactive'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

@@ -1,0 +1,24 @@
+import { Organization } from '../organization/organization';
+/** 
+ * 
+*/
+export class Department {
+    /** the id of the department */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the organization of the department */
+    organization: Organization;
+    /** the code of the department */
+    departmentCode: string;
+    /** the name of the department */
+    departmentName: string;
+    /** the date modified of the department */
+    modified: string;
+    /** the modifier of the department */
+    modifier: string;
+    /** the status of the department */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

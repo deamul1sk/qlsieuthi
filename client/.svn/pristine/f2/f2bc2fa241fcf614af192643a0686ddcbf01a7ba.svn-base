@@ -1,0 +1,30 @@
+import { Linhvuckt } from '../linhvuckt/linhvuckt';
+/** 
+ * 
+*/
+export class ReportTarget {
+    /** the id of the reportTarget */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the Linhvuckt of the data */
+    linhvuckt: Linhvuckt;
+    /** the code of the reportTarget */
+    reportTargetCode: string;
+    /** the name of the reportTarget */
+    reportTargetName: string;
+    /** the date modified of the reportTarget */
+    modified: string;
+    /** the modifier of the reportTarget */
+    modifier: string;
+    /** the status of the reportTarget */
+    status: string;
+    /** the parent id of the reportTarget */
+    parentReportTargetId: number;
+    /** the level of the reportTarget */
+    reportTargetLevel: number;
+    /** the path of the reportTarget */
+    path: string;
+    /** check mark*/
+    checked: boolean;
+}

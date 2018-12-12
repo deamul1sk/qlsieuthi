@@ -1,0 +1,21 @@
+/** 
+ * 
+*/
+export class Religion {
+    /** the id of the religion */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the religion */
+    religionCode: string;
+    /** the name of the religion */
+    religionName: string;
+    /** the english name of the religion */
+    modified: string;
+    /** the modifier of the religion */
+    modifier: string;
+    /** the status of the religion */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

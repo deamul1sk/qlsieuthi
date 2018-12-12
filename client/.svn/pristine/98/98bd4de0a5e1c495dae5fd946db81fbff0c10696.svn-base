@@ -1,0 +1,144 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Dmdvkiemtoan } from './dmdvkiemtoan';
+import { District } from '../district/district';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class DmdvkiemtoanForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static dmdvkiemtoanForm(fb: FormBuilder, business: string): FormGroup {
+        var dmdvkiemtoanForm: FormGroup;
+
+        dmdvkiemtoanForm = fb.group({
+            id: "",
+            maDonVi: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            tenDonVi: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            loaiDonVi: ["", Validators.compose([
+                Validators.required
+            ])],
+            idDonvicha: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            diaChi: ["", Validators.compose([
+                Validators.maxLength(200),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            nguoiDaiDien: ["", Validators.compose([
+                Validators.maxLength(200),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            soDienThoai: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.PHONE_NUMBER_PATTERN)
+            ])],
+            email: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.EMAIL_PATTERN)
+            ])],
+            fax: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.PHONE_NUMBER_PATTERN)
+            ])],
+            province: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            district: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            ward: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            nation: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            organization: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            capDonVi: [1, Validators.compose([
+                Validators.required,
+                Validators.min(0)
+            ])]
+        });
+        return dmdvkiemtoanForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param dmdvkiemtoan : đối tượng đích
+     */
+    static bindingData(dmdvkiemtoanForm: FormGroup, dmdvkiemtoan: Dmdvkiemtoan) {
+        debugger;
+        var provinceId = 0, districtId = 0, wardId = 0, nationId = 0,
+         organizationId = 0;
+         
+        if (dmdvkiemtoan.province != undefined && dmdvkiemtoan.province != null) {
+            provinceId = dmdvkiemtoan.province.id;   
+        }
+        
+        if (dmdvkiemtoan.district != undefined && dmdvkiemtoan.district != null) {
+            districtId = dmdvkiemtoan.district.id;
+        }
+        if (dmdvkiemtoan.ward != undefined && dmdvkiemtoan.ward != null) {
+            wardId = dmdvkiemtoan.ward.id;
+        }
+        if (dmdvkiemtoan.nation != undefined && dmdvkiemtoan.nation != null) {
+            nationId = dmdvkiemtoan.nation.id
+        }
+        if (dmdvkiemtoan.organization != undefined && dmdvkiemtoan.organization != null) {
+            organizationId = dmdvkiemtoan.organization.id
+        }
+        dmdvkiemtoanForm.setValue({
+            id: dmdvkiemtoan.id,
+            province: { id: provinceId },
+            district: { id: districtId },
+            ward: { id: wardId },
+            nation: { id: nationId },
+            organization: { id: organizationId },
+            maDonVi: dmdvkiemtoan.maDonVi,
+            tenDonVi: dmdvkiemtoan.tenDonVi,
+            idDonvicha: dmdvkiemtoan.idDonvicha,
+            loaiDonVi: dmdvkiemtoan.loaiDonVi,
+            diaChi: dmdvkiemtoan.diaChi,
+            nguoiDaiDien: dmdvkiemtoan.nguoiDaiDien,
+            soDienThoai: dmdvkiemtoan.soDienThoai,
+            email: dmdvkiemtoan.email,
+            fax: dmdvkiemtoan.fax,
+            status: dmdvkiemtoan.status,
+            capDonVi: dmdvkiemtoan.capDonVi,
+        });
+    }
+}

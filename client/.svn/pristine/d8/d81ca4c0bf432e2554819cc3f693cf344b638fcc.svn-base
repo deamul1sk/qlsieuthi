@@ -1,0 +1,49 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { GroupUser } from './groupUser';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class GroupUserForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static groupUserForm(fb: FormBuilder, business: string): FormGroup {
+        var groupUserForm: FormGroup;
+        
+        groupUserForm = fb.group({
+            id: "",
+            code: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            name: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(50),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+        });
+        return groupUserForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param groupUser : đối tượng đích
+     */
+    static bindingData(groupUserForm: FormGroup, groupUser: GroupUser) {
+        groupUserForm.setValue({
+            id: groupUser.id,
+            code: groupUser.code,
+            name: groupUser.name,
+            status: groupUser.status
+        });
+    }
+}

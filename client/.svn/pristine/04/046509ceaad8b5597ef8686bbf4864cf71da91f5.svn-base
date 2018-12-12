@@ -1,0 +1,54 @@
+import { Province } from '../province/province';
+import { District } from '../district/district';
+import { Ward } from '../ward/ward';
+import { Nation } from '../nation/nation';
+import { Organization } from '../organization/organization';
+/** 
+ * 
+*/
+export class Dmdvkiemtoan {
+    /** the id of the dmdvkiemtoan */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the province of the dmdvkiemtoan */
+    province: Province;
+    /** the district of the dmdvkiemtoan */
+    district: District;
+    /** the ward of the dmdvkiemtoan */
+    ward: Ward;
+    /** the nation of the dmdvkiemtoan */
+    nation: Nation;
+    /** the code of the dmdvkiemtoan */
+    maDonVi: string;
+    /** the name of the dmdvkiemtoan */
+    tenDonVi: string;
+    /** the type of the dmdvkiemtoan */
+    loaiDonVi: string;
+    /** the address of the dmdvkiemtoan */
+    diaChi: string;
+    /** the type of the dmdvkiemtoan */
+    nguoiDaiDien: string;
+    /** the phone number of the dmdvkiemtoan */
+    soDienThoai: string;
+    /** the email of the dmdvkiemtoan */
+    email: string;
+    /** the fax of the dmdvkiemtoan */
+    fax: string;
+    /** the parent of the dmdvkiemtoan */
+    idDonvicha: number;
+    /** the organization of the dmdvkiemtoan */
+    organization: Organization;
+    /** the level of the dmdvkiemtoan */
+    capDonVi: number;
+    /** the path of the dmdvkiemtoan */
+    path: string;
+    /** the date modified of the dmdvkiemtoan */
+    modified: string;
+    /** the modifier of the dmdvkiemtoan */
+    modifier: string;
+    /** the status of the dmdvkiemtoan */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

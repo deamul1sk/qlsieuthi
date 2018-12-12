@@ -1,0 +1,182 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { NationService } from '../nation.service';
+import { NationForm } from '../nation-form.component';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-nation-business',
+  templateUrl: './nation-business.component.html',
+  providers: [NationService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class NationBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  nationForm: FormGroup;
+  nation: any;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private nationService: NationService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.nationForm = NationForm.nationForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.nationForm, this.id);
+      }
+    });
+  }
+
+  isEqualOld(thenew, type) {
+    try {
+      var old;
+      if(type == "code") {
+        old = this.nation.nationCode;
+      } else if(type == "name") {
+        old = this.nation.nationName;
+      }
+      if(old != thenew && old == this.standardized(thenew, type)) {
+        return false;
+      } else return true;
+    } catch(e) {}
+  }
+  standardized(thenew, type) {
+    thenew = thenew.trim();
+    if(type == "code") {
+      thenew = thenew.split(" ").join("");
+    } else {
+      // console.log('xsa');
+      thenew = thenew.replace(/\s+/g, ' ');
+    }
+    return thenew;
+  }
+
+  bindingData(nationForm, id) {
+    this.nationService.findOne(id)
+      .then(response => {
+        this.nation = response.data;
+        NationForm.bindingData(nationForm, this.nation);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param nation : truyền object cần chỉnh sửa.
+   */
+  submit(nation) {
+    if (this.isUpdate) {
+      this.updateNation(nation);
+    } else {
+      this.createNation(nation);
+    }
+  }
+
+  createNation(nation) {
+    this.nationService.create(nation)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateNation(nation) {
+    this.nationService.update(nation)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.nationForm.get('nationCode').invalid) {
+      if (this.nationForm.get('nationCode').errors.required) {
+        return false;
+      }
+      if (this.nationForm.get('nationCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.nationForm.get('nationCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    if(!this.nationForm.get('nationCode').invalid) {
+      if (this.nationForm.get('nationCode').value.trim() == '') {
+        return false;
+      }
+    }
+    // check nation name is valid
+    if (this.nationForm.get('nationName').invalid) {
+      if (this.nationForm.get('nationName').errors.required) {
+        return false;
+      }
+      if (this.nationForm.get('nationName').errors.pattern != null) {
+        return false;
+      }
+      if (this.nationForm.get('nationName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    
+    return true;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

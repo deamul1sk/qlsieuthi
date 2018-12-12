@@ -1,0 +1,163 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { ProfessionService } from '../profession.service';
+import { ProfessionForm } from '../profession-form.component';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-profession-business',
+  templateUrl: './profession-business.component.html',
+  providers: [ProfessionService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class ProfessionBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  professionForm: FormGroup;
+  profession: any;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private professionService: ProfessionService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.professionForm = ProfessionForm.professionForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.professionForm, this.id);
+      }
+    });
+  }
+  
+  bindingData(professionForm, id) {
+    this.professionService.findOne(id)
+      .then(response => {
+        this.profession = response.data;
+        ProfessionForm.bindingData(professionForm, this.profession);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param profession : truyền object cần chỉnh sửa.
+   */
+  submit(profession) {
+    if (this.isUpdate) {
+      this.updateProfession(profession);
+    } else {
+      this.createProfession(profession);
+    }
+  }
+
+  createProfession(profession) {
+    this.professionService.create(profession)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateProfession(profession) {
+    this.professionService.update(profession)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.professionForm.get('code').invalid) {
+      if (this.professionForm.get('code').errors.required) {
+        return false;
+      }
+      if (this.professionForm.get('code').errors.pattern != null) {
+        return false;
+      }
+      if (this.professionForm.get('code').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check profession name is valid
+    if (this.professionForm.get('name').invalid) {
+      if (this.professionForm.get('name').errors.required) {
+        return false;
+      }
+      if (this.professionForm.get('name').errors.pattern != null) {
+        return false;
+      }
+      if (this.professionForm.get('name').errors.maxlength != null) {
+        return false;
+      }
+    }
+    if (true) {
+      if(this.professionForm.get('no').value == null) {
+        return false;
+      }
+
+      if(this.professionForm.get('no').value < 0) {
+        return false;
+      }
+    }
+    
+    
+    return true;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

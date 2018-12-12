@@ -1,0 +1,161 @@
+import { Injectable } from '@angular/core';
+import { Http, Headers } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+
+import { Constants } from '../../../common/util/constants';
+import { Position } from './Position';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../authentication/guard/authentication.service';
+import { CommonService } from '../../../common/util/common-service/common.service';
+import { HeaderField } from '../../../common/util/header-field';
+import { HeaderValue } from '../../../common/util/header-value';
+
+/**
+ * Examine the handling  of business requirements with Position module
+ */
+@Injectable()
+export class PositionService extends CommonService {
+
+    /**  the api url */
+    PositionApi = Constants.API_URL + "positions";
+
+    constructor(
+        private http: Http,
+        router: Router
+    ) {
+        super(router)
+    }
+
+    /**
+     * @description create a new position
+     * @param position the new position
+     */
+    create(position: Position): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.PositionApi,
+            JSON.stringify(position), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+     /**
+   * @description get page country
+   * @param position the search restriction
+   * @param page the paging restriction
+   */
+  searchPosition(position: Position, page: number): Promise<any> {
+    let accessToken = this.getAccessToken();
+    var secureHeaders = new Headers();
+    secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+    secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+    var promise = this.http.post(this.PositionApi + "/search?page=" + page + "&size=" + Constants.PAGE_SIZE + "&type=1",
+    position, { headers: secureHeaders })
+        .toPromise()
+        .then(response => response.json() as any)
+        .catch(error => {
+            return this.handleError(error);
+        });
+    return promise;
+}
+
+    /**
+     * @description update the position
+     * @param position the new position
+     */
+    update(position: Position): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.put(this.PositionApi,
+            JSON.stringify(position), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description delete positions by id
+     * @param entityIds the list id 
+     */
+    deleteCountriesById(entityIds: number[]): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var test = JSON.stringify(entityIds);
+        var promise = this.http.delete(this.PositionApi + "/delete-multiple/"+ entityIds, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+   * @description get page position
+   * @param position the search restriction
+   * @param page the paging restriction
+   */
+    getPagePosition(position: Position, page: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.PositionApi + "?page=" + page+"&size="+Constants.PAGE_SIZE+"&type=1", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list position
+     */
+    getListPosition(): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.PositionApi + "/all?type=-1", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description hàm trả về thông tin 1 Position
+     * @param id id của Position
+     */
+    findOne(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.PositionApi + "/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+}

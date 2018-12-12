@@ -1,0 +1,65 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Province } from './province';
+import { Country } from '../country/country';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class ProvinceForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static provinceForm(fb: FormBuilder, business: string): FormGroup {
+        var provinceForm: FormGroup;
+
+        provinceForm = fb.group({
+            id: "",
+            provinceCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            provinceName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            countNumber: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            country: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+        });
+        return provinceForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param province : đối tượng đích
+     */
+    static bindingData(provinceForm: FormGroup, province: Province) {
+        debugger;
+        provinceForm.patchValue({
+            id: province.id,
+            provinceCode: province.provinceCode,
+            provinceName: province.provinceName,
+            status: province.status,
+            countNumber: province.countNumber,
+            country: {
+                id: province.country.id
+            }
+        });
+    }
+}

@@ -1,0 +1,136 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.LinhVucTTHC' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.LinhVucTTHC' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="linhvuctthcForm" (ngSubmit)="submit(linhvuctthcForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="code">{{ 'LinhVucTTHC.LinhVucTTHCCode' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="code" type="text" ng-trim="true" class="form-control" formControlName="code" placeholder="{{ 'LinhVucTTHC.LinhVucTTHCCode' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="linhvuctthcForm.get('code').invalid && (linhvuctthcForm.get('code').touched)">
+                                                <span *ngIf="linhvuctthcForm.get('code').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!linhvuctthcForm.get('code').errors.required&&linhvuctthcForm.get('code').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!linhvuctthcForm.get('code').errors.required&&linhvuctthcForm.get('code').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 10
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'LinhVucTTHC.LinhVucTTHCName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="name" type="text" class="form-control" formControlName="name" placeholder="{{ 'LinhVucTTHC.LinhVucTTHCName' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="linhvuctthcForm.get('name').invalid && (linhvuctthcForm.get('name').touched)">
+                                                <span *ngIf="linhvuctthcForm.get('name').errors.required||linhvuctthcForm.get('name').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!linhvuctthcForm.get('name').errors.required&&linhvuctthcForm.get('name').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="abbreviation">{{ 'LinhVucTTHC.Abbreviation' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="abbreviation" type="text" ng-trim="true" class="form-control" formControlName="abbreviation" placeholder="{{ 'LinhVucTTHC.Abbreviation' | translate }}"
+                                            />
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="description">{{ 'LinhVucTTHC.Description' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <textarea class="form-control" id="description" formControlName="description" cols="4"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="no">{{ 'LinhVucTTHC.NO' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="no" type="number" ng-trim="true" class="form-control" formControlName="no" placeholder="{{ 'LinhVucTTHC.NO' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="(linhvuctthcForm.get('no').touched)">
+                                                <span *ngIf="linhvuctthcForm.get('no').value==null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="linhvuctthcForm.get('no').value<0">
+                                                    {{ 'Message.NumberInvalid' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" *ngIf="isUpdate===true">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="status">{{'LinhVucTTHC.Status'|translate}}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <select class="form-control" formControlName="status" autofocus>
+                                                <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                                            </select>
+                                            <small class="error" *ngIf="linhvuctthcForm.get('status').invalid 
+                                  && (linhvuctthcForm.get('status').touched)">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

@@ -1,0 +1,58 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Right.Title' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{ 'Right.Code' | translate }}</label>
+                                        <div class="col-md-8">{{right?.code}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{ 'Right.Name' | translate }}</label>
+                                        <div class="col-md-8">{{right?.name}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{ 'Right.Api' | translate }}</label>
+                                        <div class="col-md-8">{{right?.api}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Right.Created'|translate}}</label>
+                                        <div class="col-md-8">{{right?.created}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Right.Creater'|translate}}</label>
+                                        <div class="col-md-8">{{right?.creater}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Right.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{right?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{ 'Right.Modifier' | translate }}</label>
+                                        <div class="col-md-8">{{right?.modifier}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

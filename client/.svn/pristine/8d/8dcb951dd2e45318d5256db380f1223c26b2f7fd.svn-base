@@ -1,0 +1,158 @@
+import { Injectable } from '@angular/core';
+import { Http, Headers } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+
+import { Constants } from '../../../common/util/constants';
+import { Linhvuckt } from './Linhvuckt';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../authentication/guard/authentication.service';
+import { CommonService } from '../../../common/util/common-service/common.service';
+import { HeaderField } from '../../../common/util/header-field';
+import { HeaderValue } from '../../../common/util/header-value';
+
+/**
+ * Examine the handling  of business requirements with Linhvuckt module
+ */
+@Injectable()
+export class LinhvucktService extends CommonService {
+
+    /**  the api url */
+    LinhvucktApi = Constants.API_URL + "linhvuckt";
+
+    constructor(
+        private http: Http,
+        router: Router
+    ) {
+        super(router)
+    }
+
+    /**
+     * @description create a new linhvuckt
+     * @param linhvuckt the new linhvuckt
+     */
+    create(linhvuckt: Linhvuckt): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.LinhvucktApi,
+            JSON.stringify(linhvuckt), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description update the linhvuckt
+     * @param linhvuckt the new linhvuckt
+     */
+    update(linhvuckt: Linhvuckt): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.put(this.LinhvucktApi,
+            JSON.stringify(linhvuckt), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description delete linhvuckts by id
+     * @param entityIds the list id 
+     */
+    deleteCountriesById(entityIds: number[]): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        var test = JSON.stringify(entityIds);
+        var promise = this.http.post(this.LinhvucktApi + "/delete", entityIds, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+   * @description get page linhvuckt
+   * @param linhvuckt the search restriction
+   * @param page the paging restriction
+   */
+    getPageLinhvuckt(linhvuckt: Linhvuckt, page: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.LinhvucktApi + "/advance-search?page=" + page + "&size=" + Constants.PAGE_SIZE + "&type=1",
+            linhvuckt, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list linhvuckt
+     */
+    getListLinhvuckt(): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.LinhvucktApi + "/advance-search?type=-1", new Object(), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list linhvuckt by level
+     */
+    getListLinhvucktByLevel(level: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.LinhvucktApi + "?level=" + level, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description hàm trả về thông tin 1 Linhvuckt
+     * @param id id của Linhvuckt
+     */
+    findOne(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.LinhvucktApi + "/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+}

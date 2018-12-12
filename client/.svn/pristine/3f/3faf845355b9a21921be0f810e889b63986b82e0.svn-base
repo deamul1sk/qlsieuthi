@@ -1,0 +1,49 @@
+
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { DistrictService } from '../district.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { District } from '../district';
+
+
+@Component({
+  selector: 'app-district-detail',
+  templateUrl: './district-detail.component.html',
+  providers: [DistrictService]
+})
+
+/**
+ * @description: Component management show detail
+ */
+export class DistrictDetailComponent implements OnInit {
+  private sub: any;
+  id: number;
+  district: District;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private districtService: DistrictService,
+    public vcr: ViewContainerRef
+  ) {}
+
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.districtService.findOne(this.id)
+      .then(response => {
+        this.district = response.data;
+      })
+      .catch(error =>{
+        console.log("errors: " + error);
+      })
+    });
+  }
+  goBack() {
+    this.location.back();
+  }
+
+}

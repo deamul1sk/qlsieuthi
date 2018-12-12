@@ -1,0 +1,56 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Country' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.CountryCode'|translate}}</label>
+                                        <div class="col-md-8">{{country?.countryCode}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.CountryName'|translate}}</label>
+                                        <div class="col-md-8">{{country?.countryName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.EnglishName'|translate}}</label>
+                                        <div class="col-md-8">{{country?.englishName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.Modifier'|translate}}</label>
+                                        <div class="col-md-8">{{country?.modifier}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{country?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.Version'|translate}}</label>
+                                        <div class="col-md-8">{{country?.version}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Country.Status'|translate}}</label>
+                                        <div class="col-md-8">{{country?.status==1?'Active':'Inactive'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

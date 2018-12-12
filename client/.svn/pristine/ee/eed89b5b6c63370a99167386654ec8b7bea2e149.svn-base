@@ -1,0 +1,49 @@
+
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { PositionService } from '../position.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { Position } from '../position';
+
+
+@Component({
+  selector: 'app-position-detail',
+  templateUrl: './position-detail.component.html',
+  providers: [PositionService]
+})
+
+/**
+ * @description: Component management show detail
+ */
+export class PositionDetailComponent implements OnInit {
+  private sub: any;
+  id: number;
+  position: Position;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private positionService: PositionService,
+    public vcr: ViewContainerRef
+  ) {}
+
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.positionService.findOne(this.id)
+      .then(response => {
+        this.position = response.data;
+      })
+      .catch(error =>{
+        console.log("errors: " + error);
+      })
+    });
+  }
+  goBack() {
+    this.location.back();
+  }
+
+}

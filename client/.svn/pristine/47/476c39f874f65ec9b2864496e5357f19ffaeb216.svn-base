@@ -1,0 +1,58 @@
+<div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN EXAMPLE TABLE PORTLET-->
+            <div class="portlet box grey-cascade">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Department' | translate }} > {{ 'Action.Detail'
+                        | translate }}
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form class="form-horizontal align-middle">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Department.DepartmentCode'|translate}}</label>
+                                            <div class="col-md-8">{{department?.departmentCode}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Department.DepartmentName'|translate}}</label>
+                                            <div class="col-md-8">{{department?.departmentName}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Organization.Title'|translate}}</label>
+                                            <div class="col-md-8">{{department?.organization.organizationName}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Department.Modifier'|translate}}</label>
+                                            <div class="col-md-8">{{department?.modifier}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Department.Modified'|translate}}</label>
+                                            <div class="col-md-8">{{department?.modified}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Department.Version'|translate}}</label>
+                                            <div class="col-md-8">{{department?.version}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Department.Status'|translate}}</label>
+                                            <div class="col-md-8">{{department?.status==1?'Active':'Inactive'}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn default" (click)="goBack()">
+                                        <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END EXAMPLE TABLE PORTLET-->
+        </div>
+    </div>

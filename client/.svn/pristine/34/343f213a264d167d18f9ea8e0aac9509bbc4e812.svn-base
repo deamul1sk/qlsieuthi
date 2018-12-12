@@ -1,0 +1,409 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { UserForm } from './user-form.component';
+
+import { UserService } from './user.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { User } from './User';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { DistrictService } from '../../categories/district/district.service';
+import { ProvinceService } from '../../categories/province/province.service';
+import { WardService } from '../../categories/ward/ward.service';
+import { NationService } from '../../categories/nation/nation.service';
+import { OrganizationService } from '../../categories/organization/organization.service';
+import { District } from '../../categories/district/district';
+import { Province } from '../../categories/province/Province';
+import { Ward } from '../../categories/ward/ward';
+import { Nation } from '../../categories/nation/nation';
+import { Organization } from '../../categories/organization/organization';
+import { PageInfo } from '../../../common/util/page-info';
+
+@Component({
+    selector: 'app-user-list',
+    templateUrl: './user-list.component.html',
+    providers: [UserService, DialogService, DataTable, DistrictService,
+        ProvinceService, WardService, NationService, OrganizationService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'User'
+ */
+export class UserListComponent implements OnInit {
+    // user page
+    userInfo: PageInfo<User[]>;
+    // list user 
+    users: User[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page size
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: User;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listDistrict: District[];
+    districtSelections: Array<any> = [];
+
+    listProvince: Province[];
+    provinceSelections: Array<any> = [];
+
+    listWard: Ward[];
+    wardSelections: Array<any> = [];
+
+    listNation: Nation[];
+    nationSelections: Array<any> = [];
+
+    listOrganization: Organization[];
+    organizationSelections: Array<any> = [];
+
+    constructor(
+        private userService: UserService,
+        private districtService: DistrictService,
+        private provinceService: ProvinceService,
+        private wardService: WardService,
+        private nationService: NationService,
+        private organizationService: OrganizationService,
+        private dialogService: DialogService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) { this.toastr.setRootViewContainerRef(vcr); }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = UserForm.userForm(this.fb, '');
+        // initialize object
+        this.searchObject = new User();
+        // get list district
+        this.getListDistrict();
+        // get list province
+        this.getListProvince();
+        // get datas.
+        this.getPageUser(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param user: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageUser(user: User, page: number) {
+        this.searchObject = user;
+        this.userService.getPageUser(user, page)
+            .then(response => {
+                this.userInfo = response.data;
+                this.users = this.userInfo.content;
+                this.pageLength = this.userInfo.content.length;
+                this.totalElements = this.userInfo.totalElements;
+                this.totalPages = this.userInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page: number) {
+        var flag = false;
+        if (this.currentPage >= page && this.userInfo.first == false) {
+            flag = true;
+        }
+        if (this.currentPage <= page && this.userInfo.last == false) {
+            flag = true;
+        }
+        if (flag == true) {
+            this.currentPage = page;
+            this.getPageUser(this.searchObject, this.currentPage);
+        }
+    }
+    private setCurrentPage() {
+        if (this.userInfo.numberOfElements > 0) {
+            this.currentPageView = this.userInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.userInfo.numberOfElements;
+        var size = this.userInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param userId 
+     */
+    delete(username: string) {
+        var listUsername = [];
+        listUsername.push(username);
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.userService.deleteUsersById(listUsername)
+                        .then(response => {
+                            let message;
+                            this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.success('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                            this.getPageUser(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.users.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var listUsername = [];
+        this.users.forEach(item => {
+            if (item.checked == true) {
+                listUsername.push(item.username);
+            }
+        });
+        if (listUsername.length > 0) {
+            this.dialogService.confirm()
+                .subscribe(response => {
+                    if (response == true) {
+                        this.userService.deleteUsersById(listUsername)
+                            .then(response => {
+                                let message;
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.checkAllItemFlag = false;
+                                this.getPageUser(this.searchObject, this.currentPage);
+                                this.numberDeleteItems = 0;
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            })
+                            .catch(error => {
+                                let message;
+                                this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.numberDeleteItems = 0;
+                                this.checkAllItemFlag = false;
+                                this.getPageUser(this.searchObject, this.currentPage);
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            });
+                    }
+                })
+        }
+    }
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.users.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+
+    private getListDistrict() {
+        this.districtService.getListDistrict()
+            .then(response => {
+                this.listDistrict = response.data;
+                this.initializeDistrictSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeDistrictSelection() {
+        let user_datas = [];
+        if (this.listDistrict != null && this.listDistrict != undefined) {
+            this.listDistrict.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.districtName;
+                item.id = element.id;
+                user_datas.push(item);
+            });
+        }
+        this.districtSelections = user_datas;
+    }
+
+    private getListProvince() {
+        this.provinceService.getListProvince()
+            .then(response => {
+                this.listProvince = response.data;
+                this.initializeProvinceSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeProvinceSelection() {
+        let user_datas = [];
+        if (this.listProvince != null && this.listProvince != undefined) {
+            this.listProvince.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.provinceName;
+                item.id = element.id;
+                user_datas.push(item);
+            });
+        }
+        this.provinceSelections = user_datas;
+    }
+
+    private getListWard() {
+        this.wardService.getListWard()
+            .then(response => {
+                this.listWard = response.data;
+                this.initializeWardSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeWardSelection() {
+        let user_datas = [];
+        if (this.listWard != null && this.listWard != undefined) {
+            this.listWard.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.wardName;
+                item.id = element.id;
+                user_datas.push(item);
+            });
+        }
+        this.wardSelections = user_datas;
+    }
+
+    private getListNation() {
+        this.nationService.getListNation()
+            .then(response => {
+                this.listNation = response.data;
+                this.initializeNationSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeNationSelection() {
+        let user_datas = [];
+        if (this.listNation != null && this.listNation != undefined) {
+            this.listNation.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.nationName;
+                item.id = element.id;
+                user_datas.push(item);
+            });
+        }
+        this.nationSelections = user_datas;
+    }
+
+    private getListOrganization() {
+        this.organizationService.getListOrganization()
+            .then(response => {
+                this.listOrganization = response.data;
+                this.initializeOrganizationSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeOrganizationSelection() {
+        let user_datas = [];
+        if (this.listOrganization != null && this.listOrganization != undefined) {
+            this.listOrganization.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.organizationName;
+                item.id = element.id;
+                user_datas.push(item);
+            });
+        }
+        this.organizationSelections = user_datas;
+    }
+
+}

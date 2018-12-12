@@ -1,0 +1,152 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { GroupUserService } from '../groupUser.service';
+import { GroupUserForm } from '../groupUser-form.component';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-groupUser-business',
+  templateUrl: './groupUser-business.component.html',
+  providers: [GroupUserService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class GroupUserBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  groupUserForm: FormGroup;
+  groupUser: any;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private groupUserService: GroupUserService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.groupUserForm = GroupUserForm.groupUserForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.groupUserForm, this.id);
+      }
+    });
+  }
+
+  bindingData(religionForm, id) {
+    this.groupUserService.findOne(id)
+      .then(response => {
+        this.groupUser = response.data;
+        GroupUserForm.bindingData(religionForm, this.groupUser);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param groupUser : truyền object cần chỉnh sửa.
+   */
+  submit(groupUser) {
+    if (this.isUpdate) {
+      this.updateGroupUser(groupUser);
+    } else {
+      this.createGroupUser(groupUser);
+    }
+  }
+
+  createGroupUser(groupUser) {
+    this.groupUserService.create(groupUser)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateGroupUser(groupUser) {
+    this.groupUserService.update(groupUser)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check groupUser code is valid
+    if (this.groupUserForm.get('code').invalid) {
+      if (this.groupUserForm.get('code').errors.required) {
+        return false;
+      }
+      if (this.groupUserForm.get('code').errors.pattern != null) {
+        return false;
+      }
+      if (this.groupUserForm.get('code').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check groupUser name is valid
+    if (this.groupUserForm.get('name').invalid) {
+      if (this.groupUserForm.get('name').errors.required) {
+        return false;
+      }
+      if (this.groupUserForm.get('name').errors.pattern != null) {
+        return false;
+      }
+      if (this.groupUserForm.get('name').errors.maxlength != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

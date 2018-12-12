@@ -1,0 +1,23 @@
+/** 
+ * the country class
+*/
+export class Country {
+    /** the id of the country */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the country */
+    countryCode: string;
+    /** the name of the country */
+    countryName: string;
+    /** the english name of the country */
+    englishName: string;
+    /** the date modified of the country */
+    modified: string;
+    /** the modifier of the country */
+    modifier: string;
+    /** the status of the country */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

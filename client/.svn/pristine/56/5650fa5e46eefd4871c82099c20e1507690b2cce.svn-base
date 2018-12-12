@@ -1,0 +1,42 @@
+import { AppComponent } from '../app.component';
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { AmComponent } from './am.component';
+import { AuthGuard } from '../authentication/guard/auth.guard';
+
+const routes: Routes = [
+  {
+    path: '',component :AmComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', loadChildren: '../common/shared/home/home.module#HomeModule'  },
+      //categories
+      { path: 'country', loadChildren: './categories/country/country.module#CountryModule' },
+      { path: 'province', loadChildren: './categories/province/province.module#ProvinceModule' },
+      { path: 'ward', loadChildren: './categories/ward/ward.module#WardModule' },
+      { path: 'district', loadChildren: './categories/district/district.module#DistrictModule' },
+      { path: 'reportTarget', loadChildren: './categories/reportTarget/reportTarget.module#ReportTargetModule' },
+      { path: 'organization', loadChildren: './categories/organization/organization.module#OrganizationModule' },
+      { path: 'linhvuckt', loadChildren: './categories/linhvuckt/linhvuckt.module#LinhvucktModule' },
+      { path: 'dmdvkiemtoan', loadChildren: './categories/dmdvkiemtoan/dmdvkiemtoan.module#DmdvkiemtoanModule' },
+      { path: 'department', loadChildren: './categories/department/department.module#DepartmentModule' },
+      { path: 'currency', loadChildren: './categories/currency/currency.module#CurrencyModule' },
+
+      { path: 'nation', loadChildren: './categories/nation/nation.module#NationModule' },
+      { path: 'position', loadChildren: './categories/position/position.module#PositionModule' },
+      { path: 'religion', loadChildren: './categories/religion/religion.module#ReligionModule' },
+      { path: 'reportForm', loadChildren: './categories/reportForm/reportForm.module#ReportFormModule' },
+
+      { path: 'user', loadChildren: './user/user/user.module#UserModule' },
+      { path: 'groupUser', loadChildren: './user/groupUser/groupUser.module#GroupUserModule'}
+    ]
+  }
+
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class AmRoutingModule { }

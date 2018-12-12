@@ -1,0 +1,21 @@
+/** 
+ * 
+*/
+export class ReportForm {
+    /** the id of the reportForm */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the reportForm */
+    reportFormCode: string;
+    /** the name of the reportForm */
+    reportFormName: string;
+    /** the english name of the reportForm */
+    modified: string;
+    /** the modifier of the reportForm */
+    modifier: string;
+    /** the status of the reportForm */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

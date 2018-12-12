@@ -1,0 +1,135 @@
+<div class="row">
+  <div class="col-md-12">
+    <!-- BEGIN EXAMPLE TABLE PORTLET-->
+    <div class="portlet box grey-cascade">
+      <div class="portlet-title">
+        <div class="caption" *ngIf="isUpdate===true">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Province' | translate }} > {{ 'Action.Update' | translate
+          }}
+        </div>
+        <div class="caption" *ngIf="isUpdate===false">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Province' | translate }} > {{ 'Action.Create' | translate
+          }}
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+            <form class="form-horizontal align-middle" [formGroup]="provinceForm" (ngSubmit)="submit(provinceForm.value)">
+              <div class="row">
+                <div class="col-md-6">
+                  <input id="id" type="hidden" class="form-control" formControlName="id" />
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="provinceCode">{{ 'Province.ProvinceCode' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="provinceCode" type="text" ng-trim="true" class="form-control" formControlName="provinceCode" placeholder="{{ 'Province.ProvinceCode' | translate }}"
+                      />
+                      <small class="error" *ngIf="provinceForm.get('provinceCode').invalid && (provinceForm.get('provinceCode').touched)">
+                        <span *ngIf="provinceForm.get('provinceCode').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!provinceForm.get('provinceCode').errors.required&&provinceForm.get('provinceCode').errors.pattern!=null">
+                          {{ 'Message.CodeInvalid' | translate }}
+                        </span>
+                        <span *ngIf="!provinceForm.get('provinceCode').errors.required&&provinceForm.get('provinceCode').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 10
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="provinceName">{{ 'Province.ProvinceName' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="provinceName" type="text" class="form-control" formControlName="provinceName" placeholder="{{ 'Province.ProvinceName' | translate }}"
+                      />
+                      <small class="error" *ngIf="provinceForm.get('provinceName').invalid && (provinceForm.get('provinceName').touched)">
+                        <span *ngIf="provinceForm.get('provinceName').errors.required||provinceForm.get('provinceName').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!provinceForm.get('provinceName').errors.required&&provinceForm.get('provinceName').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="country">
+                    <label class="control-label col-md-4" for="id">{{ 'Country.Title' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexCountrySelection!=null?[countrySelections[indexCountrySelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="countrySelections" (selected)="provinceForm.get('country.id').setValue($event?.id)" (removed)="provinceForm.get('country.id').setValue(0)"
+                        placeholder="{{ 'Country.ChooseCountry' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="provinceForm.get('country.id').invalid 
+                                  && (provinceForm.get('country.id').touched)">
+                        <span *ngIf="provinceForm.get('country.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="provinceForm.get('country.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="countNumber">{{ 'Province.CountNumber' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="countNumber" type="number" class="form-control" formControlName="countNumber" placeholder="{{'Province.CountNumber' | translate}}"
+                      />
+                      <small class="error" *ngIf="provinceForm.get('countNumber').invalid 
+                        && (provinceForm.get('countNumber').touched)">
+                        <span *ngIf="provinceForm.get('countNumber').errors.min!=null">
+                          {{ 'Message.NumberInvalid' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6" *ngIf="isUpdate===true">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="status">{{'Province.Status'|translate}}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <select class="form-control" formControlName="status" autofocus>
+                        <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                      </select>
+                      <small class="error" *ngIf="provinceForm.get('status').invalid 
+                                  && (provinceForm.get('status').touched)">
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                <button type="button" class="btn default" (click)="goBack()">
+                  <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END EXAMPLE TABLE PORTLET-->
+  </div>
+</div>

@@ -1,0 +1,251 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Organization' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Organization' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="organizationForm" (ngSubmit)="submit(organizationForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="organizationCode">{{ 'Organization.OrganizationCode' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="organizationCode" type="text" ng-trim="true" class="form-control" formControlName="organizationCode" placeholder="{{ 'Organization.OrganizationCode' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('organizationCode').invalid && (organizationForm.get('organizationCode').touched)">
+                                                <span *ngIf="organizationForm.get('organizationCode').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('organizationCode').errors.required&&organizationForm.get('organizationCode').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('organizationCode').errors.required&&organizationForm.get('organizationCode').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 10
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="organizationName">{{ 'Organization.OrganizationName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="organizationName" type="text" class="form-control" formControlName="organizationName" placeholder="{{ 'Organization.OrganizationName' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('organizationName').invalid && (organizationForm.get('organizationName').touched)">
+                                                <span *ngIf="organizationForm.get('organizationName').errors.required||organizationForm.get('organizationName').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('organizationName').errors.required&&organizationForm.get('organizationName').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="organizationLevel">{{ 'Organization.OrganizationLevel' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="organizationLevel" type="number" (change)="levelChanged(level.value)" #level min="1" max="10" class="form-control" formControlName="organizationLevel" placeholder="{{'Organization.OrganizationLevel' | translate}}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('organizationLevel').invalid 
+                                                                      && (organizationForm.get('organizationLevel').touched)">
+                                                <span *ngIf="organizationForm.get('organizationLevel').errors.required||organizationForm.get('organizationLevel').errors.min!=null">
+                                                    {{ 'Message.NumberInvalid' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="parentOrganizationId">{{ 'Organization.ParentOrganization' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <ng-select [active]="indexOrganizationSelection!=null?[organizationSelections[indexOrganizationSelection]]:''" [allowClear]="true"
+                                                [disabled]="disabled" [items]="organizationSelections" (selected)="organizationForm.get('parentOrganizationId').setValue($event?.id)"
+                                                (removed)="organizationForm.get('parentOrganizationId').setValue(0)" placeholder="{{ 'Organization.ParentOrganization' | translate }}"
+                                                ngDefaultControl>
+                                            </ng-select>
+                                            <small class="error" *ngIf="organizationForm.get('parentOrganizationId').invalid 
+                                                                            && (organizationForm.get('parentOrganizationId').touched)">
+                                                <span *ngIf="organizationForm.get('parentOrganizationId').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="organizationForm.get('parentOrganizationId').errors.min!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="organizationType">{{'Organization.OrganizationType'|translate}}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <select class="form-control" formControlName="organizationType" autofocus>
+                                                <option *ngFor="let organizationType of listOrganizationType" [value]="organizationType.id">{{organizationType.name}}</option>
+                                            </select>
+                                            <small class="error" *ngIf="organizationForm.get('organizationType').invalid 
+                                                                      && (organizationForm.get('organizationType').touched)">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group" formGroupName="province">
+                                        <label class="control-label col-md-4" for="id">{{ 'Province.Title' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <ng-select [active]="indexProvinceSelection!=null?[provinceSelections[indexProvinceSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                                                [items]="provinceSelections" (selected)="organizationForm.get('province.id').setValue($event?.id)"
+                                                (removed)="organizationForm.get('province.id').setValue(0)" placeholder="{{ 'Province.ChooseProvince' | translate }}"
+                                                ngDefaultControl>
+                                            </ng-select>
+                                            <small class="error" *ngIf="organizationForm.get('province.id').invalid 
+                                                              && (organizationForm.get('province.id').touched)">
+                                                <span *ngIf="organizationForm.get('province.id').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="organizationForm.get('province.id').errors.min!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="address">{{ 'Organization.Address' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="address" type="text" class="form-control" formControlName="address" placeholder="{{ 'Organization.Address' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('address').invalid && (organizationForm.get('address').touched)">
+                                                <span *ngIf="organizationForm.get('address').errors.required||organizationForm.get('address').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('address').errors.required&&organizationForm.get('address').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="phoneNumber">{{ 'Organization.PhoneNumber' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="phoneNumber" type="text" class="form-control" formControlName="phoneNumber" placeholder="{{ 'Organization.PhoneNumber' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('phoneNumber').invalid && (organizationForm.get('phoneNumber').touched)">
+                                                <span *ngIf="organizationForm.get('phoneNumber').errors.required||organizationForm.get('phoneNumber').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('phoneNumber').errors.required&&organizationForm.get('phoneNumber').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="email">{{ 'Organization.Email' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ 'Organization.Email' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('email').invalid && (organizationForm.get('email').touched)">
+                                                <span *ngIf="organizationForm.get('email').errors.required||organizationForm.get('email').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('email').errors.required&&organizationForm.get('email').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="fax">{{ 'Organization.Fax' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="fax" type="text" class="form-control" formControlName="fax" placeholder="{{ 'Organization.Fax' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="organizationForm.get('fax').invalid && (organizationForm.get('fax').touched)">
+                                                <span *ngIf="organizationForm.get('fax').errors.required||organizationForm.get('fax').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!organizationForm.get('fax').errors.required&&organizationForm.get('fax').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6" *ngIf="isUpdate===true">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="status">{{'Organization.Status'|translate}}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <select class="form-control" formControlName="status" autofocus>
+                                                <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                                            </select>
+                                            <small class="error" *ngIf="organizationForm.get('status').invalid 
+                                      && (organizationForm.get('status').touched)">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

@@ -1,0 +1,26 @@
+import { Province } from '../province/province';
+/** 
+ * 
+*/
+export class District {
+    /** the id of the district */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the province of the district */
+    province: Province;
+    /** the code of the district */
+    districtCode: string;
+    /** the name of the district */
+    districtName: string;
+    /** the count number of the district */
+    countNumber: number;
+    /** the date modified of the district */
+    modified: string;
+    /** the modifier of the district */
+    modifier: string;
+    /** the status of the district */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

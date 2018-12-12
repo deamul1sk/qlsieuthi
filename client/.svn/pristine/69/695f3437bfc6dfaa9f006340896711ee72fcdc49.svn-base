@@ -1,0 +1,91 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Organization } from './organization';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class OrganizationForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static organizationForm(fb: FormBuilder, business: string): FormGroup {
+        var organizationForm: FormGroup;
+        organizationForm = fb.group({
+            id: "",
+            organizationCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            organizationName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            organizationType: [-1, Validators.compose([
+                Validators.required,
+            ])],
+            organizationLevel: [1, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            parentOrganizationId: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            province: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            address: ["", Validators.compose([
+                Validators.maxLength(200),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            phoneNumber: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.PHONE_NUMBER_PATTERN)
+            ])],
+            email: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.EMAIL_PATTERN)
+            ])],
+            fax: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.PHONE_NUMBER_PATTERN)
+            ])],
+        });
+        return organizationForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param organization : đối tượng đích
+     */
+    static bindingData(organizationForm: FormGroup, organization: Organization) {
+        organizationForm.setValue({
+            id: organization.id,
+            organizationCode: organization.organizationCode,
+            organizationName: organization.organizationName,
+            organizationType: organization.organizationType,
+            organizationLevel: organization.organizationLevel,
+            parentOrganizationId: organization.parentOrganizationId,
+            address: organization.address,
+            phoneNumber: organization.phoneNumber,
+            email: organization.email,
+            fax: organization.fax,
+            province: {
+                id: organization.province.id
+            },
+            status: organization.status
+        });
+    }
+}

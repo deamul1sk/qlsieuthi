@@ -1,0 +1,94 @@
+<!-- BEGIN SIDEBAR -->
+<ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-light " data-keep-expanded="false" data-auto-scroll="true"
+ data-slide-speed="200" style="padding-top: 20px">
+	<!-- DOC: To remove the sidebar toggler from the sidebar you just need to completely remove the below "sidebar-toggler-wrapper" LI element -->
+	<!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+	<li class="sidebar-toggler-wrapper hide">
+		<div class="sidebar-toggler">
+			<span></span>
+		</div>
+	</li>
+	<ng-container>
+		<li class="nav-item">
+			<a href="javascript:;" class="nav-link nav-toggle">
+				<i class="fa fa-angle-right" aria-hidden="true"></i>
+				<span class="title">Danh mục dùng chung</span>
+				<span class="arrow "></span>
+			</a>
+			<ul class="sub-menu">
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/country">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Country</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/province">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Province</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/district">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						District</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/ward">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Ward</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/reportTarget">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Report Target</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/organization">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Organization</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/linhvuckt">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Lĩnh vực kiểm toán</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/dmdvkiemtoan">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Đầu mối đơn vị KT</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/currency">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Currency</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/department">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Department</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/nation">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Nation</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/position">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Position</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/religion">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						Religion</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/reportForm">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						ReportForm</a>
+				</li>
+			</ul>
+		</li>
+	</ng-container>
+
+</ul>
+<!-- END SIDEBAR MENU -->

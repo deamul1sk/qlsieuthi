@@ -1,0 +1,161 @@
+import { Injectable } from '@angular/core';
+import { Http, Headers } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+
+import { Constants } from '../../../common/util/constants';
+import { GroupUser } from './groupUser';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../authentication/guard/authentication.service';
+import { CommonService } from '../../../common/util/common-service/common.service';
+import { HeaderField } from '../../../common/util/header-field';
+import { HeaderValue } from '../../../common/util/header-value';
+
+/**
+ * Examine the handling  of business requirements with GroupUser module
+ */
+@Injectable()
+export class GroupUserService extends CommonService {
+
+    /**  the api url */
+    GroupUserApi = Constants.API_URL + "user-group";
+
+    constructor(
+        private http: Http,
+        router: Router
+    ) {
+        super(router)
+    }
+
+    /**
+     * @description create a new GroupUser
+     * @param groupUser the new GroupUser
+     */
+    create(groupUser: GroupUser): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.GroupUserApi,
+            JSON.stringify(groupUser), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+     /**
+   * @description get page GroupUser
+   * @param groupUser the search restriction
+   * @param page the paging restriction
+   */
+  searchGroupUser(groupUser: GroupUser, page: number): Promise<any> {
+    let accessToken = this.getAccessToken();
+    var secureHeaders = new Headers();
+    secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+    secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+    var promise = this.http.post(this.GroupUserApi + "/search?page=" + page + "&size=" + Constants.PAGE_SIZE + "&type=1",
+    groupUser, { headers: secureHeaders })
+        .toPromise()
+        .then(response => response.json() as any)
+        .catch(error => {
+            return this.handleError(error);
+        });
+    return promise;
+}
+
+    /**
+     * @description update the GroupUser
+     * @param groupUser the new GroupUser
+     */
+    update(groupUser: GroupUser): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.put(this.GroupUserApi,
+            JSON.stringify(groupUser), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description delete GroupUsers by id
+     * @param entityIds the list id 
+     */
+    deleteGroupUserById(entityIds: number[]): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.delete(this.GroupUserApi + "/delete-multiple/" + entityIds, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    
+    /**
+   * @description get page GroupUser
+   * @param groupUser the search restriction
+   * @param page the paging restriction
+   */
+    getPageGroupUser(groupUser: GroupUser,page: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.GroupUserApi + "?page=" + page+"&size="+Constants.PAGE_SIZE+"&type=1", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list GroupUser
+     */
+    getListGroupUser(): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.GroupUserApi + "/list", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description hàm trả về thông tin 1 GroupUser
+     * @param id id của GroupUser
+     */
+    findOne(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.GroupUserApi + "/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+}

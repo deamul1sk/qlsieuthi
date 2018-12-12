@@ -1,0 +1,24 @@
+import { Country } from '../country/country';
+/** 
+ * 
+*/
+export class Currency {
+    /** the id of the currency */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the country of the currency */
+    country: Country;
+    /** the code of the currency */
+    currencyCode: string;
+    /** the name of the currency */
+    currencyName: string;
+    /** the date modified of the currency */
+    modified: string;
+    /** the modifier of the currency */
+    modifier: string;
+    /** the status of the currency */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

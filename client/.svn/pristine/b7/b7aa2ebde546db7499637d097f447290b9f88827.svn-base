@@ -1,0 +1,68 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { ReportTarget } from './reportTarget';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class ReportTargetForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static reportTargetForm(fb: FormBuilder, business: string): FormGroup {
+        var reportTargetForm: FormGroup;
+        
+        reportTargetForm = fb.group({
+            id: "",
+            reportTargetCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            reportTargetName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            reportTargetLevel: [1, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            parentReportTargetId: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            linhvuckt: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+        });
+        return reportTargetForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param reportTarget : đối tượng đích
+     */
+    static bindingData(reportTargetForm: FormGroup, reportTarget: ReportTarget) {
+        reportTargetForm.setValue({
+            id: reportTarget.id,
+            reportTargetCode: reportTarget.reportTargetCode,
+            reportTargetName: reportTarget.reportTargetName,
+            status: reportTarget.status,
+            reportTargetLevel: reportTarget.reportTargetLevel,
+            parentReportTargetId: reportTarget.parentReportTargetId,
+            linhvuckt: {
+                id: reportTarget.linhvuckt.id
+            }
+        });
+    }
+}

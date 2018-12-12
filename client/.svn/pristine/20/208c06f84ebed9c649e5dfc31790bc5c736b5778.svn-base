@@ -1,0 +1,21 @@
+/** 
+ * 
+*/
+export class GroupUser  {
+    /** the id of the groupUser */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the groupUser */
+    code: string;
+    /** the name of the groupUser */
+    name: string;
+    /** the english name of the groupUser */
+    modified: string;
+    /** the modifier of the groupUser */
+    modifier: string;
+    /** the status of the groupUser */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

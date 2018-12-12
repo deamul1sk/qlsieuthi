@@ -1,0 +1,286 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { NationForm } from './nation-form.component';
+
+import { NationService } from './nation.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { Nation } from './Nation';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { PageInfo } from '../../../common/util/page-info';
+import { ExcelExportService } from '../../../common/util/common-service/excel.service';
+
+@Component({
+    selector: 'app-nation-list',
+    templateUrl: './nation-list.component.html',
+    providers: [NationService, DialogService, DataTable]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'Nation'
+ */
+export class NationListComponent implements OnInit {
+    // nation page
+    nationInfo: PageInfo<Nation[]>;
+    // list nation 
+    nations: Nation[];
+    //> list nation to export excel
+    nationsToExport: Nation[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page sizw
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: Nation;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    constructor(
+        private nationService: NationService,
+        private dialogService: DialogService,
+        private exportExcelService: ExcelExportService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) 
+    { 
+        this.toastr.setRootViewContainerRef(vcr); 
+        this.exportExcelService = exportExcelService;
+    }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = NationForm.nationForm(this.fb, '');
+        // initialize object
+        this.searchObject = new Nation();
+        // get datas.
+        this.getPageNation(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param nation: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageNation(nation: Nation, page: number) {
+        this.searchObject = nation;
+        this.nationService.getPageNation(nation, page)
+            .then(response => {
+                this.nationInfo = response.data;
+                this.nations = this.nationInfo.content;
+                this.pageLength = this.nationInfo.content.length;
+                this.totalElements = this.nationInfo.totalElements;
+                this.totalPages = this.nationInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(
+                error => {
+                    console.log(error);
+                });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page: number) {
+        var flag = false;
+        if (this.currentPage >= page && this.nationInfo.first == false) {
+            flag = true;
+        }
+        if (this.currentPage <= page && this.nationInfo.last == false) {
+            flag = true;
+        }
+        if (flag == true) {
+            this.currentPage = page;
+            this.getPageNation(this.searchObject, this.currentPage);
+        }
+    }
+
+    private setCurrentPage() {
+        if (this.nationInfo.numberOfElements > 0) {
+            this.currentPageView = this.nationInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.nationInfo.numberOfElements;
+        var size = this.nationInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+
+    /**
+     * @description: put the objects into the object list will be deleted
+     *              Delete list object
+     * @param nationId the id of object
+     */
+    deleteOneItem(id: number) {
+        var entityIds = [];
+        entityIds.push(id);
+        this.delete(entityIds);
+
+    }
+
+    /**
+     * @description: delete entities
+     * @param nationId 
+     */
+    delete(entityIds: number[]) {
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.nationService.deleteCountriesById(entityIds)
+                        .then(response => {
+                            let message;
+                            if (response.code == 200) {
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            } else if (response.code == 400) {
+                                this.translate.get('Message.DeleteFail400').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            }
+
+                            this.getPageNation(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Delete all item checked all
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.nations.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: delete items checked
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.nations.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+        if (entityIds.length > 0) {
+            this.delete(entityIds);
+        }
+    }
+
+    /** 
+     * @description Count the number of objects checked
+    */
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.nations.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    /**
+     * @description: export list country to excel
+     */
+    
+    exportFileExcel() {
+        this.nationService.getListNationToExport()
+            .then(res => {
+                this.nationsToExport = JSON.parse(JSON.stringify(res.data));
+                this.exportExcelService.exportAsExcelFile(this.nationsToExport, Constants.NATION_EXCEL);
+                let message;
+                this.translate.get('Message.ExportSuccess').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.success('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+            .catch(err => {
+                let message;
+                this.translate.get('Message.ExportError').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.error('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+}

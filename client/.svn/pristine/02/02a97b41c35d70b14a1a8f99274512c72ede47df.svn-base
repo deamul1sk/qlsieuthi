@@ -1,0 +1,29 @@
+/** 
+ * 
+*/
+export class LinhVucTTHC {
+    /** the id of the position */
+    id: number;
+    /** the version of the data */
+    no: number;
+    /** the code of the position */
+    code: string;
+    /** the name of the position */
+    name: string;
+    /** the abbreviation of the position */
+    abbreviation: string;
+    /** the abbreviation of the position */
+    description: string;
+    /** the status of the data */
+    status: number;
+    /** the created of the data */
+    created: Date;
+    /** the creater of the data */
+    creater: string;
+    /** the english name of the position */
+    modified: Date;
+    /** the modifier of the position */
+    modifier: string;
+    /** check mark*/
+    checked: boolean;
+}

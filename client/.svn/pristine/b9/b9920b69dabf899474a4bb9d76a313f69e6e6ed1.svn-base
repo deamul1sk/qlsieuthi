@@ -1,0 +1,21 @@
+/** 
+ * 
+*/
+export class Position {
+    /** the id of the position */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the position */
+    positionCode: string;
+    /** the name of the position */
+    positionName: string;
+    /** the english name of the position */
+    modified: string;
+    /** the modifier of the position */
+    modifier: string;
+    /** the status of the position */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

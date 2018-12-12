@@ -1,0 +1,175 @@
+import { Injectable } from '@angular/core';
+import { Http, Headers } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+
+import { Constants } from '../../../common/util/constants';
+import { Ward } from './Ward';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../authentication/guard/authentication.service';
+import { CommonService } from '../../../common/util/common-service/common.service';
+import { HeaderField } from '../../../common/util/header-field';
+import { HeaderValue } from '../../../common/util/header-value';
+
+/**
+ * Examine the handling  of business requirements with Ward module
+ */
+@Injectable()
+export class WardService extends CommonService {
+
+    /**  the api url */
+    WardApi = Constants.API_URL + "wards";
+
+    constructor(
+        private http: Http,
+        router: Router
+    ) {
+        super(router)
+    }
+
+    /**
+     * @description create a new ward
+     * @param ward the new ward
+     */
+    create(ward: Ward): Promise<any> {
+        ward.status = "1";
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.WardApi,
+            JSON.stringify(ward), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description update the ward
+     * @param ward the new ward
+     */
+    update(ward: Ward): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.put(this.WardApi,
+            ward, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description delete wards by id
+     * @param entityIds the list id 
+     */
+    deleteWardsById(entityIds: number[]): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var test = JSON.stringify(entityIds);
+        var promise = this.http.delete(this.WardApi + "/delete-multiple/" + entityIds, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+   * @description get page ward
+   * @param ward the search restriction
+   * @param page the paging restriction
+   */
+    getPageWard(ward: Ward, page: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.WardApi + "/search?page=" + page + "&size=" + Constants.PAGE_SIZE,
+        ward, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list ward
+     */
+    getListWard(): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.WardApi + "/all", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+    /**
+     * @description get list ward
+     */
+    getListWardByProvinceId(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.WardApi + "/province/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+    /**
+     * @description get list ward
+     */
+    getListWardByDistrictId(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.WardApi + "/district/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description hàm trả về thông tin 1 Ward
+     * @param id id của Ward
+     */
+    findOne(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.WardApi + "/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+}

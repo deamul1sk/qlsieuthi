@@ -1,0 +1,62 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { LinhVucTTHC } from './linhvuctthc';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class LinhVucTTHCForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static linhvuctthcForm(fb: FormBuilder, business: string): FormGroup {
+        var linhvuctthcForm: FormGroup;
+        
+        linhvuctthcForm = fb.group({
+            id: "",
+            code: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            name: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(256),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            abbreviation: ["", Validators.compose([
+                Validators.maxLength(256)
+            ])],
+            no: [0, Validators.compose([
+                Validators.maxLength(10)
+            ])],
+            description: ["", Validators.compose([
+                Validators.maxLength(1024)
+            ])],
+            status: [1, Validators.compose([
+                Validators.required,
+                Validators.maxLength(10)
+            ])],
+        });
+        return linhvuctthcForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param linhvuctthc : đối tượng đích
+     */
+    static bindingData(linhvuctthcForm: FormGroup, linhvuctthc: LinhVucTTHC) {
+        linhvuctthcForm.setValue({
+            id: linhvuctthc.id,
+            code: linhvuctthc.code,
+            name: linhvuctthc.name,
+            abbreviation: linhvuctthc.abbreviation,
+            no: linhvuctthc.no,
+            description: linhvuctthc.description,
+            status: linhvuctthc.status,
+        });
+    }
+}

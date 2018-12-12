@@ -1,0 +1,359 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { WardForm } from './ward-form.component';
+
+import { WardService } from './ward.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { Ward } from './Ward';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { District } from '../district/district';
+import { DistrictService } from '../district/district.service';
+import { ProvinceService } from '../province/province.service';
+import { Province } from '../province/Province';
+import { PageInfo } from '../../../common/util/page-info';
+import { ExcelExportService } from '../../../common/util/common-service/excel.service';
+
+@Component({
+    selector: 'app-ward-list',
+    templateUrl: './ward-list.component.html',
+    providers: [WardService, DialogService, DataTable, DistrictService, ProvinceService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'Ward'
+ */
+export class WardListComponent implements OnInit {
+    // ward page
+    wardInfo: PageInfo<Ward[]>;
+    // list ward 
+    wards: Ward[];
+    // list ward to export excel 
+    wardsToExport: Ward[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page sizw
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: Ward;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listWardLevel = [
+        { id: 0, name: 'Phường' },
+        { id: 1, name: 'Xã' },
+        { id: 2, name: 'Thị trấn' }
+      ];
+
+    listDistrict: District[];
+
+    districtSelections: Array<any> = [];
+
+    listProvince: Province[];
+
+    provinceSelections: Array<any> = [];
+
+    constructor(
+        private wardService: WardService,
+        private districtService: DistrictService,
+        private provinceService: ProvinceService,
+        private exportExcelService: ExcelExportService,
+        private dialogService: DialogService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) 
+    { 
+        this.toastr.setRootViewContainerRef(vcr); 
+        this.exportExcelService = exportExcelService;
+    }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = WardForm.wardForm(this.fb, '');
+        // initialize object
+        this.searchObject = new Ward();
+        // set warl level
+        this.searchObject.wardLevel = -1;
+        // get list district
+        this.getListDistrict();
+        // get list province
+        this.getListProvince();
+        // get datas.
+        this.getPageWard(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param ward: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageWard(ward: Ward, page: number) {
+        this.searchObject = ward;
+        this.wardService.getPageWard(ward, page)
+            .then(response => {
+                this.wardInfo = response.data;
+                this.wards = this.wardInfo.content;
+                this.pageLength = this.wardInfo.content.length;
+                this.totalElements = this.wardInfo.totalElements;
+                this.totalPages = this.wardInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page: number) {
+        debugger;
+        var flag = false;
+        if (this.currentPage >= page && this.wardInfo.first == false) {
+            flag = true;
+        }
+        if (this.currentPage <= page && this.wardInfo.last == false) {
+            flag = true;
+        }
+        if (flag == true) {
+            this.currentPage = page;
+            this.getPageWard(this.searchObject, this.currentPage);
+        }
+    }
+    private setCurrentPage() {
+        if (this.wardInfo.numberOfElements > 0) {
+            this.currentPageView = this.wardInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.wardInfo.numberOfElements;
+        var size = this.wardInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+
+    /**
+     * @description: put the objects into the object list will be deleted
+     *              Delete list object
+     * @param wardId the id of object
+     */
+    deleteOneItem(id: number) {
+        var entityIds = [];
+        entityIds.push(id);
+        this.delete(entityIds);
+
+    }
+
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param wardId 
+     */
+    delete(entityIds: number[]) {
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.wardService.deleteWardsById(entityIds)
+                        .then(response => {
+                            debugger;
+                            let message;
+                            if (response.code == 200) {
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            } else if (response.code == 400) {
+                                this.translate.get('Message.DeleteFail400').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            }
+
+                            this.getPageWard(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.wards.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.wards.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+        if (entityIds.length > 0) {
+            this.delete(entityIds);
+        }
+    }
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.wards.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+
+    private getListDistrict() {
+        this.districtService.getListDistrict()
+            .then(response => {
+                this.listDistrict = response.data;
+                this.initializeDistrictSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeDistrictSelection() {
+        let ward_datas = [];
+        if (this.listDistrict != null && this.listDistrict != undefined) {
+            this.listDistrict.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.districtName;
+                item.id = element.id;
+                ward_datas.push(item);
+            });
+        }
+        this.districtSelections = ward_datas;
+        console.log(this.districtSelections);
+    }
+
+    private getListProvince() {
+        this.provinceService.getListProvince()
+            .then(response => {
+                this.listProvince = response.data;
+                this.initializeProvinceSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: export list country to excel
+     */
+    exportFileExcel() {
+        this.wardService.getListWardsToExport()
+            .then(res => {
+                this.wardsToExport = JSON.parse(JSON.stringify(res.data));
+                this.exportExcelService.exportAsExcelFile(this.wardsToExport, Constants.WARD_EXCEL);
+                let message;
+                this.translate.get('Message.ExportSuccess').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.success('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+            .catch(err => {
+                let message;
+                this.translate.get('Message.ExportError').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.error('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+
+    }
+    private initializeProvinceSelection() {
+        let ward_datas = [];
+        if (this.listProvince != null && this.listProvince != undefined) {
+            this.listProvince.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.provinceName;
+                item.id = element.id;
+                ward_datas.push(item);
+            });
+        }
+        this.provinceSelections = ward_datas;
+        console.log(this.provinceSelections);
+    }
+
+}

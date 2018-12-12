@@ -1,0 +1,49 @@
+
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { WardService } from '../ward.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { Ward } from '../ward';
+
+
+@Component({
+  selector: 'app-ward-detail',
+  templateUrl: './ward-detail.component.html',
+  providers: [WardService]
+})
+
+/**
+ * @description: Component management show detail
+ */
+export class WardDetailComponent implements OnInit {
+  private sub: any;
+  id: number;
+  ward: Ward;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private wardService: WardService,
+    public vcr: ViewContainerRef
+  ) {}
+
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.wardService.findOne(this.id)
+      .then(response => {
+        this.ward = response.data;
+      })
+      .catch(error =>{
+        console.log("errors: " + error);
+      })
+    });
+  }
+  goBack() {
+    this.location.back();
+  }
+
+}

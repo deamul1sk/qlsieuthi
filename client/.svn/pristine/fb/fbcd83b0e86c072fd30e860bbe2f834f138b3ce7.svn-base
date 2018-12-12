@@ -1,0 +1,62 @@
+<div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN EXAMPLE TABLE PORTLET-->
+            <div class="portlet box grey-cascade">
+                <div class="portlet-title">
+                    <div class="caption">
+                        <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.District' | translate }} > {{ 'Action.Detail'
+                        | translate }}
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form class="form-horizontal align-middle">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.DistrictCode'|translate}}</label>
+                                            <div class="col-md-8">{{district?.districtCode}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.DistrictName'|translate}}</label>
+                                            <div class="col-md-8">{{district?.districtName}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'Province.Title'|translate}}</label>
+                                            <div class="col-md-8">{{district?.province.provinceName}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.CountNumber'|translate}}</label>
+                                            <div class="col-md-8">{{district?.countNumber}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.Modifier'|translate}}</label>
+                                            <div class="col-md-8">{{district?.modifier}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.Modified'|translate}}</label>
+                                            <div class="col-md-8">{{district?.modified}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.Version'|translate}}</label>
+                                            <div class="col-md-8">{{district?.version}}</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-4 text-right">{{'District.Status'|translate}}</label>
+                                            <div class="col-md-8">{{district?.status==1?'Active':'Inactive'}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn default" (click)="goBack()">
+                                        <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END EXAMPLE TABLE PORTLET-->
+        </div>
+    </div>

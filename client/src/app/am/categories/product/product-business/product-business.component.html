@@ -1,0 +1,105 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Product.Title' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Product.Title' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="productForm" (ngSubmit)="submit(productForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="code">{{ 'Product.Code' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="code" type="text" ng-trim="true" class="form-control" formControlName="code" placeholder="{{ 'Product.Code' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="productForm.get('code').invalid && (productForm.get('code').touched)">
+                                                <span *ngIf="productForm.get('code').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!productForm.get('code').errors.required&&productForm.get('code').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!productForm.get('code').errors.required&&productForm.get('code').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 10
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'Product.Name' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="name" type="text" class="form-control" formControlName="name" placeholder="{{ 'Product.Name' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="productForm.get('name').invalid && (productForm.get('name').touched)">
+                                                <span *ngIf="productForm.get('name').errors.required||productForm.get('name').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!productForm.get('name').errors.required&&productForm.get('name').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'Product.Category' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="category" type="text" class="form-control" formControlName="category" placeholder="{{ 'Product.Category' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="productForm.get('category').invalid && (productForm.get('category').touched)">
+                                                <span *ngIf="productForm.get('category').errors.pattern!=null">
+                                                    {{ 'Message.UserNameInvalid' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'Product.Price' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="price" type="text" class="form-control" formControlName="price" placeholder="{{ 'Product.Price' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="productForm.get('price').invalid && (productForm.get('price').touched)">
+                                                <span *ngIf="productForm.get('price').errors.pattern!=null">
+                                                    {{ 'Message.UserNameInvalid' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

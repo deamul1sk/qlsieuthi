@@ -1,0 +1,77 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Ward } from './ward';
+import { District } from '../district/district';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class WardForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static wardForm(fb: FormBuilder, business: string): FormGroup {
+        var wardForm: FormGroup;
+
+        wardForm = fb.group({
+            id: "",
+            wardCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            wardName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(150),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            wardLevel: [-1, Validators.compose([
+                Validators.required
+            ])],
+            countNumber: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            district: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            province: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            })
+        });
+        return wardForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param ward : đối tượng đích
+     */
+    static bindingData(wardForm: FormGroup, ward: Ward) {
+        wardForm.patchValue({
+            id: ward.id,
+            wardCode: ward.wardCode,
+            wardName: ward.wardName,
+            status: ward.status,
+            countNumber: ward.countNumber,
+            wardLevel: ward.wardLevel,
+            district: {
+                id: ward.district.id
+            },
+            province: {
+                id: ward.province.id
+            }
+        });
+    }
+}

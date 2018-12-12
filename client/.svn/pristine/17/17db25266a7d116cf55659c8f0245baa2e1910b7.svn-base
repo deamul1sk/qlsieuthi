@@ -1,0 +1,54 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.ReportForm' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'ReportForm.ReportFormCode'|translate}}</label>
+                                        <div class="col-md-8">{{reportForm?.reportFormCode}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'ReportForm.ReportFormName'|translate}}</label>
+                                        <div class="col-md-8">{{reportForm?.reportFormName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'ReportForm.Modifier'|translate}}</label>
+                                        <div class="col-md-8">{{reportForm?.modifier}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'ReportForm.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{reportForm?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'ReportForm.Version'|translate}}</label>
+                                        <div class="col-md-8">{{reportForm?.version}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'ReportForm.Status'|translate}}</label>
+                                        <div class="col-md-8">{{reportForm?.status==1?'Active':'Inactive'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

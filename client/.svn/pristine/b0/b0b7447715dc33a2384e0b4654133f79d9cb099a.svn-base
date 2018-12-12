@@ -1,0 +1,43 @@
+import { Province } from "../province/province";
+
+/** 
+ * 
+*/
+export class Organization {
+    /** the id of the organization */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the province of the data */
+    province: Province;
+    /** the code of the organization */
+    organizationCode: string;
+    /** the name of the organization */
+    organizationName: string;
+    /** the type of the organization */
+    organizationType: string;
+    /** the level of the organization */
+    organizationLevel: number;
+    /** the parent id of the organization */
+    parentOrganizationId: number;
+    /** the path of the organization */
+    path: string;
+    /** the basedn of the organization */
+    basedn: string;
+    /** the address of the organization */
+    address: string;
+    /** the phone number of the organization */
+    phoneNumber: string;
+    /** the fax of the organization */
+    fax: string;
+    /** the email of the organization */
+    email: string;
+    /** the date modified of the organization */
+    modified: string;
+    /** the modifier of the organization */
+    modifier: string;
+    /** the status of the organization */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

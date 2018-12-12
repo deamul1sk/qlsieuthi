@@ -1,0 +1,163 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { LinhVucTTHCService } from '../linhvuctthc.service';
+import { LinhVucTTHCForm } from '../linhvuctthc-form.component';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-linhvuctthc-business',
+  templateUrl: './linhvuctthc-business.component.html',
+  providers: [LinhVucTTHCService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class LinhVucTTHCBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  linhvuctthcForm: FormGroup;
+  linhvuctthc: any;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private linhvuctthcService: LinhVucTTHCService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.linhvuctthcForm = LinhVucTTHCForm.linhvuctthcForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.linhvuctthcForm, this.id);
+      }
+    });
+  }
+
+  bindingData(linhvuctthcForm, id) {
+    this.linhvuctthcService.findOne(id)
+      .then(response => {
+        this.linhvuctthc = response.data;
+        LinhVucTTHCForm.bindingData(linhvuctthcForm, this.linhvuctthc);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param linhvuctthc : truyền object cần chỉnh sửa.
+   */
+  submit(linhvuctthc) {
+    if (this.isUpdate) {
+      this.updateLinhVucTTHC(linhvuctthc);
+    } else {
+      this.createLinhVucTTHC(linhvuctthc);
+    }
+  }
+
+  createLinhVucTTHC(linhvuctthc) {
+    this.linhvuctthcService.create(linhvuctthc)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateLinhVucTTHC(linhvuctthc) {
+    this.linhvuctthcService.update(linhvuctthc)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.linhvuctthcForm.get('code').invalid) {
+      if (this.linhvuctthcForm.get('code').errors.required) {
+        return false;
+      }
+      if (this.linhvuctthcForm.get('code').errors.pattern != null) {
+        return false;
+      }
+      if (this.linhvuctthcForm.get('code').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check linhvuctthc name is valid
+    if (this.linhvuctthcForm.get('name').invalid) {
+      if (this.linhvuctthcForm.get('name').errors.required) {
+        return false;
+      }
+      if (this.linhvuctthcForm.get('name').errors.pattern != null) {
+        return false;
+      }
+      if (this.linhvuctthcForm.get('name').errors.maxlength != null) {
+        return false;
+      }
+    }
+    if (true) {
+      if(this.linhvuctthcForm.get('no').value == null) {
+        return false;
+      }
+
+      if(this.linhvuctthcForm.get('no').value < 0) {
+        return false;
+      }
+    }
+    
+    
+    return true;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

@@ -1,0 +1,319 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { ProvinceForm } from './province-form.component';
+
+import { ProvinceService } from './province.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { Province } from './Province';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { Country } from '../country/country';
+import { CountryService } from '../country/country.service';
+import { PageInfo } from '../../../common/util/page-info';
+import { ExcelExportService } from '../../../common/util/common-service/excel.service';
+
+@Component({
+    selector: 'app-province-list',
+    templateUrl: './province-list.component.html',
+    providers: [ProvinceService, DialogService, DataTable, CountryService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'Province'
+ */
+export class ProvinceListComponent implements OnInit {
+    // province page
+    provinceInfo: PageInfo<Province[]>;
+    // list province 
+    provinces: Province[];
+    // >List provices to export file excel
+    provicesToExport: Province[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page sizw
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: Province;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listCountry: Country[];
+
+    countrySelections: Array<any> = [];
+
+    constructor(
+        private provinceService: ProvinceService,
+        private countryService: CountryService,
+        private dialogService: DialogService,
+        private exportExcelService: ExcelExportService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) 
+    { 
+        this.toastr.setRootViewContainerRef(vcr); 
+        this.exportExcelService = exportExcelService;
+    }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = ProvinceForm.provinceForm(this.fb, '');
+        // initialize object
+        this.searchObject = new Province();
+        // get list country
+        this.getListCountry();
+        // get datas.
+        this.getPageProvince(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param province: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageProvince(province: Province, page: number) {
+        console.log(province);
+        debugger;
+        this.searchObject = province;
+        this.provinceService.getPageProvince(province, page)
+            .then(response => {
+                this.provinceInfo = response.data;
+                this.provinces = this.provinceInfo.content;
+                this.pageLength = this.provinceInfo.content.length;
+                this.totalElements = this.provinceInfo.totalElements;
+                this.totalPages = this.provinceInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page: number) {
+        debugger;
+        var flag = false;
+        if (this.currentPage >= page && this.provinceInfo.first == false) {
+            flag = true;
+        }
+        if (this.currentPage <= page && this.provinceInfo.last == false) {
+            flag = true;
+        }
+        if (flag == true) {
+            this.currentPage = page;
+            this.getPageProvince(this.searchObject, this.currentPage);
+        }
+    }
+    private setCurrentPage() {
+        if (this.provinceInfo.numberOfElements > 0) {
+            this.currentPageView = this.provinceInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.provinceInfo.numberOfElements;
+        var size = this.provinceInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+
+    /**
+     * @description Delete a list provinces
+     * @param entityIds the list ids
+     */
+    private delete(entityIds: number[]) {
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    debugger
+                    this.provinceService.deleteProvincesById(entityIds)
+                        .then(response => {
+                            let message;
+                            if (response.code == 200) {
+                               
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            } else if (response.code == 400) {
+                                this.translate.get('Message.DeleteFail400').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            }
+                            this.getPageProvince(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param provinceId 
+     */
+    deleteOneItem(id: number) {
+        debugger
+        var entityIds = [];
+        entityIds.push(id);
+        this.delete(entityIds);
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.provinces.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.provinces.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+        if (entityIds.length > 0) {
+            this.delete(entityIds);
+        }
+    }
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.provinces.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    /**
+     * @description: export list country to excel
+     */
+    
+    exportFileExcel() {
+        this.provinceService.getListProvinceToExport()
+            .then(res => {
+                this.provicesToExport = JSON.parse(JSON.stringify(res.data));
+                this.exportExcelService.exportAsExcelFile(this.provicesToExport, Constants.PROVICNE_EXCEL);
+                let message;
+                this.translate.get('Message.ExportSuccess').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.success('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+            .catch(err => {
+                let message;
+                this.translate.get('Message.ExportError').subscribe((res: string) => {
+                    message = res;
+                });
+                this.toastr.error('', message, { dismiss: 'controlled' })
+                    .then((toast: Toast) => {
+                        setTimeout(() => {
+                            this.toastr.dismissToast(toast);
+                        }, 3000);
+                    });
+            })
+
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+
+    private getListCountry() {
+        this.countryService.getListCountry()
+            .then(response => {
+                this.listCountry = response.data;
+                this.initializeCountrySelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeCountrySelection() {
+        let province_datas = [];
+        if (this.listCountry != null && this.listCountry != undefined) {
+            this.listCountry.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.countryName;
+                item.id = element.id;
+                province_datas.push(item);
+            });
+        }
+        this.countrySelections = province_datas;
+    }
+
+}

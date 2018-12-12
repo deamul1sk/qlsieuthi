@@ -1,0 +1,60 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Department } from './department';
+import { Organization } from '../organization/organization';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class DepartmentForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static departmentForm(fb: FormBuilder, business: string): FormGroup {
+        var departmentForm: FormGroup;
+
+        departmentForm = fb.group({
+            id: "",
+            departmentCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            departmentName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            organization: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+        });
+        return departmentForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param department : đối tượng đích
+     */
+    static bindingData(departmentForm: FormGroup, department: Department) {
+        debugger;
+        departmentForm.setValue({
+            id: department.id,
+            departmentCode: department.departmentCode,
+            departmentName: department.departmentName,
+            status: department.status,
+            organization: {
+                id: department.organization.id
+            }
+        });
+    }
+}

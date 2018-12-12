@@ -1,0 +1,247 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { ReportTargetService } from '../reportTarget.service';
+import { ReportTargetForm } from '../reportTarget-form.component';
+import { Constants } from '../../../../common/util/constants';
+import { ReportTarget } from '../reportTarget';
+import { Linhvuckt } from '../../linhvuckt/linhvuckt';
+import { LinhvucktService } from '../../linhvuckt/linhvuckt.service';
+
+@Component({
+  selector: 'app-reportTarget-business',
+  templateUrl: './reportTarget-business.component.html',
+  providers: [ReportTargetService, LinhvucktService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class ReportTargetBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  reportTargetForm: FormGroup;
+  reportTarget: any;
+
+  isUpdate: boolean = true;
+
+  listReportTarget: ReportTarget[];
+  reportTargetSelections: Array<any> = [];
+  indexReportTargetSelection: number;
+
+  listLinhvuckt: Linhvuckt[];
+  linhvucktSelections: Array<any> = [];
+  indexLinhvucktSelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private reportTargetService: ReportTargetService,
+    private linhvucktService: LinhvucktService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.reportTargetForm = ReportTargetForm.reportTargetForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+        this.getListReportTargetByLevel(0);
+        this.getListLinhvuckt();
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.reportTargetForm, this.id);
+      }
+    });
+  }
+
+  bindingData(reportTargetForm, id) {
+    this.reportTargetService.findOne(id)
+      .then(response => {
+        this.reportTarget = response.data;
+        this.getListReportTargetByLevel(0);
+        this.getListLinhvuckt();
+        ReportTargetForm.bindingData(reportTargetForm, this.reportTarget);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param reportTarget : truyền object cần chỉnh sửa.
+   */
+  submit(reportTarget) {
+    if (this.isUpdate) {
+      this.updateReportTarget(reportTarget);
+    } else {
+      this.createReportTarget(reportTarget);
+    }
+  }
+
+  createReportTarget(reportTarget) {
+    this.reportTargetService.create(reportTarget)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateReportTarget(reportTarget) {
+    this.reportTargetService.update(reportTarget)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.reportTargetForm.get('reportTargetCode').invalid) {
+      if (this.reportTargetForm.get('reportTargetCode').errors.required) {
+        return false;
+      }
+      if (this.reportTargetForm.get('reportTargetCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.reportTargetForm.get('reportTargetCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check reportTarget name is valid
+    if (this.reportTargetForm.get('reportTargetName').invalid) {
+      if (this.reportTargetForm.get('reportTargetName').errors.required) {
+        return false;
+      }
+      if (this.reportTargetForm.get('reportTargetName').errors.pattern != null) {
+        return false;
+      }
+      if (this.reportTargetForm.get('reportTargetName').errors.maxlength != null) {
+        return false;
+      }
+    }
+
+    // check level is valid
+    if (this.reportTargetForm.get('reportTargetName').invalid) {
+      if (this.reportTargetForm.get('reportTargetName').errors.required) {
+        return false;
+      }
+      if (this.reportTargetForm.get('reportTargetName').errors.min != null) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private getListReportTargetByLevel(level: number) {
+    this.reportTargetService.getListReportTargetByLevel(level)
+      .then(response => {
+        this.listReportTarget = response.data;
+        this.initializeReportTargetSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeReportTargetSelection() {
+    let reportTarget_datas = [];
+    var countItems = 0;
+    if (this.listReportTarget != null && this.listReportTarget != undefined) {
+      this.listReportTarget.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.reportTargetName;
+        item.id = element.id;
+        reportTarget_datas.push(item);
+        if (this.reportTarget != undefined && this.reportTarget != null && item.id == this.reportTarget.parentReportTargetId) {
+          this.indexReportTargetSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.reportTargetSelections = reportTarget_datas;
+    console.log(this.reportTargetSelections);
+  }
+
+  private getListLinhvuckt() {
+    this.linhvucktService.getListLinhvuckt()
+      .then(response => {
+        this.listLinhvuckt = response.data;
+        this.initializeLinhvucktSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeLinhvucktSelection() {
+    let linhvuckt_datas = [];
+    var countItems = 0;
+    if (this.listLinhvuckt != null && this.listLinhvuckt != undefined) {
+      this.listLinhvuckt.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.tenLinhVuc;
+        item.id = element.id;
+        linhvuckt_datas.push(item);
+        if (this.reportTarget != undefined && this.reportTarget != null && item.id == this.reportTarget.linhvuckt.id) {
+          this.indexLinhvucktSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.linhvucktSelections = linhvuckt_datas;
+    console.log(this.linhvucktSelections);
+  }
+
+  levelChanged(level: number){
+    if(level>1){
+      this.getListReportTargetByLevel(level-1);
+    }
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

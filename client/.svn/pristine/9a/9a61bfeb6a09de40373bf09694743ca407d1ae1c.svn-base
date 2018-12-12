@@ -1,0 +1,50 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Nation } from './nation';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class NationForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static nationForm(fb: FormBuilder, business: string): FormGroup {
+        var nationForm: FormGroup;
+        
+        nationForm = fb.group({
+            id: "",
+            nationCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            nationName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(50),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+        });
+        return nationForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param nation : đối tượng đích
+     */
+    static bindingData(nationForm: FormGroup, nation: Nation) {
+        debugger;
+        nationForm.setValue({
+            id: nation.id,
+            nationCode: nation.nationCode,
+            nationName: nation.nationName,
+            status: nation.status
+        });
+    }
+}

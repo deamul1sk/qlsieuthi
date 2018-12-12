@@ -1,0 +1,74 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.TTHC' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.TTHCCode'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.code}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.TTHCName'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.name}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Abbreviation'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.abbreviation}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Abbreviation'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.abbreviation}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.NO'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.no}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Description'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.description}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Created'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.created}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Creater'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.creater}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Modifier'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.modifier}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'TTHC.Status'|translate}}</label>
+                                        <div class="col-md-8">{{profession?.status==1?'Active':'Inactive'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

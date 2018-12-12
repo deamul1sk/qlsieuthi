@@ -1,0 +1,68 @@
+<!-- BEGIN SIDEBAR -->
+<ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-light " data-keep-expanded="false" data-auto-scroll="true"
+ data-slide-speed="200" style="padding-top: 20px">
+	<!-- DOC: To remove the sidebar toggler from the sidebar you just need to completely remove the below "sidebar-toggler-wrapper" LI element -->
+	<!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+	<li class="sidebar-toggler-wrapper hide">
+		<div class="sidebar-toggler">
+			<span></span>
+		</div>
+	</li>
+	<ng-container>
+		<li class="nav-item">
+			<a href="javascript:;" class="nav-link nav-toggle">
+				<i class="fa fa-angle-right" aria-hidden="true"></i>
+				<span class="title">{{ 'SIDEBAR.Title' | translate }}</span>
+				<span class="arrow "></span>
+			</a>
+			<ul class="sub-menu">
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/tthc">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'TTHC.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/customer">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Customer.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/product">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Product.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/employee">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Employee.Title' | translate }}</a>
+				</li>
+			</ul>
+		</li>
+		<li class="nav-item">
+			<a href="javascript:;" class="nav-link nav-toggle">
+				<i class="fa fa-angle-right" aria-hidden="true"></i>
+				<span class="title">{{ 'SIDEBAR.UserMannager' | translate }}</span>
+				<span class="arrow "></span>
+			</a>
+			<ul class="sub-menu">
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/role">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Role.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/right">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Right.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/user">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'User.Title' | translate }}</a>
+				</li>
+			</ul>
+		</li>
+	</ng-container>
+
+</ul>
+<!-- END SIDEBAR MENU -->

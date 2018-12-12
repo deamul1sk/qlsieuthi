@@ -1,0 +1,374 @@
+<div class="row">
+  <div class="col-md-12">
+    <!-- BEGIN EXAMPLE TABLE PORTLET-->
+    <div class="portlet box grey-cascade">
+      <div class="portlet-title">
+        <div class="caption" *ngIf="isUpdate===true">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Dmdvkiemtoan' | translate }} > {{ 'Action.Update' | translate
+          }}
+        </div>
+        <div class="caption" *ngIf="isUpdate===false">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.Dmdvkiemtoan' | translate }} > {{ 'Action.Create' | translate
+          }}
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+            <form class="form-horizontal align-middle" [formGroup]="dmdvkiemtoanForm" (ngSubmit)="submit(dmdvkiemtoanForm.value)">
+              <div class="row">
+                <div class="col-md-6">
+                  <input id="id" type="hidden" class="form-control" formControlName="id" />
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="maDonVi">{{ 'Dmdvkiemtoan.MaDonVi' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="maDonVi" type="text" ng-trim="true" class="form-control" formControlName="maDonVi" placeholder="{{ 'Dmdvkiemtoan.MaDonVi' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('maDonVi').invalid && (dmdvkiemtoanForm.get('maDonVi').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('maDonVi').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('maDonVi').errors.required&&dmdvkiemtoanForm.get('maDonVi').errors.pattern!=null">
+                          {{ 'Message.CodeInvalid' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('maDonVi').errors.required&&dmdvkiemtoanForm.get('maDonVi').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 10
+                        </span>
+                      </small>
+                      <small class="error" *ngIf="!dmdvkiemtoanForm.get('maDonVi').invalid && (dmdvkiemtoanForm.get('maDonVi').touched)">
+                          <span *ngIf="dmdvkiemtoanForm.get('maDonVi').value.trim() == ''">
+                              {{ 'Message.CodeInvalid' | translate }}
+                          </span>
+                          <span *ngIf="isUpdate===true && !isEqualOld(dmdvkiemtoanForm.get('maDonVi').value, 'maDonVi')">
+                              {{ 'Message.Same' | translate }}
+                          </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="tenDonVi">{{ 'Dmdvkiemtoan.TenDonVi' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="tenDonVi" type="text" class="form-control" formControlName="tenDonVi" placeholder="{{ 'Dmdvkiemtoan.TenDonVi' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('tenDonVi').invalid && (dmdvkiemtoanForm.get('tenDonVi').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('tenDonVi').errors.required||dmdvkiemtoanForm.get('tenDonVi').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('tenDonVi').errors.required&&dmdvkiemtoanForm.get('tenDonVi').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                      <small class="error" *ngIf="!dmdvkiemtoanForm.get('tenDonVi').invalid && (dmdvkiemtoanForm.get('tenDonVi').touched)">
+                        <span *ngIf="isUpdate===true && !isEqualOld(dmdvkiemtoanForm.get('tenDonVi').value, 'tenDonVi')">
+                            {{ 'Message.Same' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="organization">
+                    <label class="control-label col-md-4" for="id">{{ 'Organization.Title' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexOrganizationSelection!=null?[organizationSelections[indexOrganizationSelection]]:''" [allowClear]="true"
+                        [disabled]="disabled" [items]="organizationSelections" (selected)="dmdvkiemtoanForm.get('organization.id').setValue($event?.id)"
+                        (removed)="dmdvkiemtoanForm.get('organization.id').setValue(0)" placeholder="{{ 'Organization.ChooseOrganization' | translate }}"
+                        ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('organization.id').invalid 
+                                        && (dmdvkiemtoanForm.get('organization.id').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('organization.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="dmdvkiemtoanForm.get('organization.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label  class="control-label col-md-4" for="idDonvicha">{{ 'Dmdvkiemtoan.DonViCha' | translate }}
+                      <span *ngIf="dmdvkiemtoanForm.get('capDonVi').value!=0" style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexDmdvktSelection!=null?[dmdvktSelections[indexDmdvktSelection]]:''" [allowClear]="true" [disabled]="dmdvkiemtoanForm.get('capDonVi').value==0"
+                        [items]="dmdvktSelections" (selected)="dmdvkiemtoanForm.get('idDonvicha').setValue($event?.id)" (removed)="dmdvkiemtoanForm.get('idDonvicha').setValue(0)"
+                        placeholder="{{ 'Dmdvkiemtoan.DonViCha' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('idDonvicha').invalid 
+                                          && (dmdvkiemtoanForm.get('idDonvicha').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('idDonvicha').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="dmdvkiemtoanForm.get('idDonvicha').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="province">
+                    <label class="control-label col-md-4" for="id">{{ 'Province.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexProvinceSelection!=null?[provinceSelections[indexProvinceSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="provinceSelections" (selected)="provinceChanged($event?.id)" (removed)="provinceChanged(0)"
+                        placeholder="{{ 'Province.ChooseProvince' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('province.id').invalid 
+                                        && (dmdvkiemtoanForm.get('province.id').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('province.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="dmdvkiemtoanForm.get('province.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="district">
+                    <label class="control-label col-md-4" for="id">{{ 'District.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexDistrictSelection!=null?[districtSelections[indexDistrictSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="districtSelections" (selected)="districtChanged($event?.id)" (removed)="districtChanged(0)"
+                        placeholder="{{ 'District.ChooseDistrict' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('district.id').invalid 
+                                    && (dmdvkiemtoanForm.get('district.id').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('district.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="dmdvkiemtoanForm.get('district.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="ward">
+                    <label class="control-label col-md-4" for="id">{{ 'Ward.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexWardSelection!=null?[wardSelections[indexWardSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="wardSelections" (selected)="wardChanged($event?.id)" (removed)="wardChanged(0)" placeholder="{{ 'Ward.ChooseWard' | translate }}"
+                        ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('ward.id').invalid 
+                                        && (dmdvkiemtoanForm.get('ward.id').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('ward.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="dmdvkiemtoanForm.get('ward.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="nation">
+                    <label class="control-label col-md-4" for="id">{{ 'Nation.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexNationSelection!=null?[nationSelections[indexNationSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="nationSelections" (selected)="dmdvkiemtoanForm.get('nation.id').setValue($event?.id)" (removed)="dmdvkiemtoanForm.get('nation.id').setValue(0)"
+                        placeholder="{{ 'Nation.ChooseNation' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('nation.id').invalid 
+                                        && (dmdvkiemtoanForm.get('nation.id').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('nation.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="dmdvkiemtoanForm.get('nation.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="diaChi">{{ 'Dmdvkiemtoan.DiaChi' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="diaChi" type="text" class="form-control" formControlName="diaChi" placeholder="{{ 'Dmdvkiemtoan.DiaChi' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('diaChi').invalid && (dmdvkiemtoanForm.get('diaChi').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('diaChi').errors.required||dmdvkiemtoanForm.get('diaChi').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('diaChi').errors.required&&dmdvkiemtoanForm.get('diaChi').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="nguoiDaiDien">{{ 'Dmdvkiemtoan.NguoiDaiDien' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="nguoiDaiDien" type="text" class="form-control" formControlName="nguoiDaiDien" placeholder="{{ 'Dmdvkiemtoan.NguoiDaiDien' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('nguoiDaiDien').invalid && (dmdvkiemtoanForm.get('nguoiDaiDien').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('nguoiDaiDien').errors.required||dmdvkiemtoanForm.get('nguoiDaiDien').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('nguoiDaiDien').errors.required&&dmdvkiemtoanForm.get('nguoiDaiDien').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="soDienThoai">{{ 'Dmdvkiemtoan.SoDienThoai' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="soDienThoai" type="text" class="form-control" formControlName="soDienThoai" placeholder="{{ 'Dmdvkiemtoan.SoDienThoai' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('soDienThoai').invalid && (dmdvkiemtoanForm.get('soDienThoai').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('soDienThoai').errors.required||dmdvkiemtoanForm.get('soDienThoai').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('soDienThoai').errors.required&&dmdvkiemtoanForm.get('soDienThoai').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="email">{{ 'Dmdvkiemtoan.Email' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ 'Dmdvkiemtoan.Email' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('email').invalid && (dmdvkiemtoanForm.get('email').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('email').errors.required||dmdvkiemtoanForm.get('email').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('email').errors.required&&dmdvkiemtoanForm.get('email').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="fax">{{ 'Dmdvkiemtoan.Fax' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="fax" type="text" class="form-control" formControlName="fax" placeholder="{{ 'Dmdvkiemtoan.Fax' | translate }}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('fax').invalid && (dmdvkiemtoanForm.get('fax').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('fax').errors.required||dmdvkiemtoanForm.get('fax').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!dmdvkiemtoanForm.get('fax').errors.required&&dmdvkiemtoanForm.get('fax').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="loaiDonVi">{{'Dmdvkiemtoan.LoaiDonVi'|translate}}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <select class="form-control" formControlName="loaiDonVi" autofocus>
+                        <option *ngFor="let loaiDonVi of listLoaiDonVi" [value]="loaiDonVi.id">{{loaiDonVi.name}}</option>
+                      </select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('loaiDonVi').invalid 
+                                            && (dmdvkiemtoanForm.get('loaiDonVi').touched)">
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="capDonVi">{{ 'Dmdvkiemtoan.CapDonVi' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="capDonVi" type="number" (change)="levelChanged(level.value)" #level min="0" max="10" class="form-control" formControlName="capDonVi" placeholder="{{'Dmdvkiemtoan.CapDonVi' | translate}}"
+                      />
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('capDonVi').invalid 
+                            && (dmdvkiemtoanForm.get('capDonVi').touched)">
+                        <span *ngIf="dmdvkiemtoanForm.get('capDonVi').errors.required||dmdvkiemtoanForm.get('capDonVi').errors.min!=null">
+                          {{ 'Message.NumberInvalid' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6" *ngIf="isUpdate===true">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="status">{{'Dmdvkiemtoan.Status'|translate}}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <select class="form-control" formControlName="status" autofocus>
+                        <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                      </select>
+                      <small class="error" *ngIf="dmdvkiemtoanForm.get('status').invalid 
+                                        && (dmdvkiemtoanForm.get('status').touched)">
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                <button type="button" class="btn default" (click)="goBack()">
+                  <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END EXAMPLE TABLE PORTLET-->
+  </div>
+</div>

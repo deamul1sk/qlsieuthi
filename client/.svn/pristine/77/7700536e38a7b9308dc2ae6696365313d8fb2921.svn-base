@@ -1,0 +1,170 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { User } from './user';
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class UserForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static userForm(fb: FormBuilder, business: string): FormGroup {
+        var userForm: FormGroup;
+
+        userForm = fb.group({
+            userId: ["", Validators.compose([
+                Validators.required
+            ])],
+            province: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            district: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            ward: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            nation: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            religion: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            position: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            organization: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+            usercode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            username: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            // dob: ["", Validators.compose([
+            //     Validators.required,
+            //     Validators.maxLength(100),
+            // ])],
+            accStatus: ["", Validators.compose([
+                Validators.required
+            ])],
+            address: ["", Validators.compose([
+                Validators.maxLength(200),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            phoneNumber: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.PHONE_NUMBER_PATTERN)
+            ])],
+            email: ["", Validators.compose([
+                Validators.maxLength(50),
+                Validators.pattern(Constants.EMAIL_PATTERN)
+            ])],
+            identifyCard: ["", Validators.compose([
+                Validators.maxLength(200),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            // ktvCardNumber: ["", Validators.compose([
+            //     Validators.maxLength(50),
+            //     Validators.pattern(Constants.PHONE_NUMBER_PATTERN)
+            // ])],
+            userLevel: [1, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            userGender: [1, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])]
+        });
+        return userForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param user : đối tượng đích
+     */
+    static bindingData(userForm: FormGroup, user: User) {
+        var provinceId = 0, districtId = 0, wardId = 0, nationId = 0, positionId = 0, 
+        religionId = 0, organizationId = 0, userGender = "1";
+
+        if (user.province != undefined && user.province != null) {
+            provinceId = user.province.id;   
+        }
+        
+        if (user.district != undefined && user.district != null) {
+            districtId = user.district.id;
+        }
+        if (user.ward != undefined && user.ward != null) {
+            wardId = user.ward.id;
+        }
+        if (user.nation != undefined && user.nation != null) {
+            nationId = user.nation.id
+        }
+        if (user.religion != undefined && user.religion != null) {
+            religionId = user.religion.id;
+        }
+        if (user.position != undefined && user.position != null) {
+            positionId = user.position.id;
+        }
+        if (user.organization != undefined && user.organization != null) {
+            organizationId = user.organization.id
+        }
+        if (user.userGender != undefined && user.userGender != null && user.userGender != "") {
+            userGender = user.userGender
+        }
+
+        userForm.setValue({
+            userId: user.userId,
+            province: { id: provinceId },
+            district: { id: districtId },
+            ward: { id: wardId },
+            nation: { id: nationId },
+            position: { id: positionId },
+            religion: { id: religionId },
+            organization: { id: organizationId },
+            usercode: user.usercode,
+            username: user.username,
+            // dob: user.dob,
+            address: user.address,
+            phoneNumber: user.phoneNumber,
+            email: user.email,
+            identifyCard: user.identifyCard,
+            // ktvCardNumber: user.ktvCardNumber,
+            userLevel: user.userLevel,
+            userGender: userGender,
+            accStatus: user.accStatus,
+        });
+        console.log("as");
+        
+    }
+}

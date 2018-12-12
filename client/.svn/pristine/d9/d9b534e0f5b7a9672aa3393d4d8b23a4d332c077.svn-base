@@ -1,0 +1,29 @@
+/** 
+ * 
+*/
+export class LinhVucTTHC {
+    /** the id of the linh vuc TTHC */
+    id: number;
+    /** the version of the data */
+    no: number;
+    /** the code of the linh vuc TTHC */
+    code: string;
+    /** the name of the linh vuc TTHC */
+    name: string;
+    /** the abbreviation of the linh vuc TTHC */
+    abbreviation: string;
+    /** the abbreviation of the linh vuc TTHC */
+    description: string;
+    /** the status of the data */
+    status: number;
+    /** the created of the data */
+    created: Date;
+    /** the creater of the data */
+    creater: string;
+    /** the english name of the linh vuc TTHC */
+    modified: Date;
+    /** the modifier of the linh vuc TTHC */
+    modifier: string;
+    /** check mark*/
+    checked: boolean;
+}

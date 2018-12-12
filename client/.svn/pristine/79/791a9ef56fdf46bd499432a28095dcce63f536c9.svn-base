@@ -1,0 +1,49 @@
+
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { GroupUserService } from '../groupUser.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { GroupUser } from '../groupUser';
+
+
+@Component({
+  selector: 'app-groupUser-detail',
+  templateUrl: './groupUser-detail.component.html',
+  providers: [GroupUserService]
+})
+
+/**
+ * @description: Component management show detail
+ */
+export class GroupUserDetailComponent implements OnInit {
+  private sub: any;
+  id: number;
+  groupUser: GroupUser;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private groupUserService: GroupUserService,
+    public vcr: ViewContainerRef
+  ) {}
+
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.groupUserService.findOne(this.id)
+      .then(response => {
+        this.groupUser = response.data;
+      })
+      .catch(error =>{
+        console.log("errors: " + error);
+      })
+    });
+  }
+  goBack() {
+    this.location.back();
+  }
+
+}

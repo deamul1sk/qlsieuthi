@@ -1,0 +1,261 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { OrganizationService } from '../organization.service';
+import { OrganizationForm } from '../organization-form.component';
+import { Constants } from '../../../../common/util/constants';
+import { Organization } from '../organization';
+import { Province } from '../../province/Province';
+import { ProvinceService } from '../../province/province.service';
+
+@Component({
+  selector: 'app-organization-business',
+  templateUrl: './organization-business.component.html',
+  providers: [OrganizationService, ProvinceService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class OrganizationBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  organizationForm: FormGroup;
+  organization: any;
+
+  isUpdate: boolean = true;
+
+  listOrganization: Organization[];
+  organizationSelections: Array<any> = [];
+  indexOrganizationSelection: number;
+
+  listProvince: Province[];
+  provinceSelections: Array<any> = [];
+  indexProvinceSelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  listOrganizationLevel = [
+    { id: 0, name: 'KTNN' },
+    { id: 1, name: 'Bộ và cơ quan ngang bộ' }
+  ];
+
+  listOrganizationType = [
+    { id: 0, name: 'Đơn vị trực thuộc KTNN' },
+    { id: 1, name: 'Đơn vị trực thuộc BTC' }
+  ];
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private organizationService: OrganizationService,
+    private provinceService: ProvinceService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.organizationForm = OrganizationForm.organizationForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+        this.getListOrganizationByLevel(0);
+        this.getListProvince();
+        this.organizationForm.patchValue({
+          organizationLevel: '0',
+          organizationType: '0',
+        });
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.organizationForm, this.id);
+      }
+    });
+  }
+
+  bindingData(organizationForm, id) {
+    this.organizationService.findOne(id)
+      .then(response => {
+        this.organization = response.data;
+        this.getListOrganizationByLevel(0);
+        this.getListProvince();
+        OrganizationForm.bindingData(organizationForm, this.organization);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param organization : truyền object cần chỉnh sửa.
+   */
+  submit(organization) {
+    if (this.isUpdate) {
+      this.updateOrganization(organization);
+    } else {
+      this.createOrganization(organization);
+    }
+  }
+
+  createOrganization(organization) {
+    this.organizationService.create(organization)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateOrganization(organization) {
+    this.organizationService.update(organization)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.organizationForm.get('organizationCode').invalid) {
+      if (this.organizationForm.get('organizationCode').errors.required) {
+        return false;
+      }
+      if (this.organizationForm.get('organizationCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.organizationForm.get('organizationCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check organization name is valid
+    if (this.organizationForm.get('organizationName').invalid) {
+      if (this.organizationForm.get('organizationName').errors.required) {
+        return false;
+      }
+      if (this.organizationForm.get('organizationName').errors.pattern != null) {
+        return false;
+      }
+      if (this.organizationForm.get('organizationName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check level is valid
+    if (this.organizationForm.get('organizationLevel').invalid) {
+      if (this.organizationForm.get('organizationLevel').errors.required) {
+        return false;
+      }
+      if (this.organizationForm.get('organizationLevel').errors.min != null) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private getListOrganizationByLevel(level: number) {
+    this.organizationService.getListOrganizationByLevel(level)
+      .then(response => {
+        this.listOrganization = response.data;
+        this.initializeOrganizationSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeOrganizationSelection() {
+    let organization_datas = [];
+    var countItems = 0;
+    if (this.listOrganization != null && this.listOrganization != undefined) {
+      this.listOrganization.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.organizationName;
+        item.id = element.id;
+        organization_datas.push(item);
+        if (this.organization != undefined && this.organization != null && item.id == this.organization.parentOrganizationId) {
+          this.indexOrganizationSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.organizationSelections = organization_datas;
+    console.log(this.organizationSelections);
+  }
+
+  private getListProvince() {
+    this.provinceService.getListProvince()
+      .then(response => {
+        this.listProvince = response.data;
+        this.initializeProvinceSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeProvinceSelection() {
+    let province_datas = [];
+    var countItems = 0;
+    if (this.listProvince != null && this.listProvince != undefined) {
+      this.listProvince.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.provinceName;
+        item.id = element.id;
+        province_datas.push(item);
+        if (this.organization != undefined && this.organization != null && item.id == this.organization.province.id) {
+          this.indexProvinceSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.provinceSelections = province_datas;
+    console.log(this.provinceSelections);
+  }
+
+  levelChanged(level: number){
+    debugger;
+    if(level>1){
+      this.getListOrganizationByLevel(level-1);
+    }
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

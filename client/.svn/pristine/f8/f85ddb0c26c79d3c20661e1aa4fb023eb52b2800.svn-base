@@ -1,0 +1,27 @@
+/** 
+ * 
+*/
+export class Linhvuckt {
+    /** the id of the linhvuckt */
+    id: number;
+    /** the version of the data */
+    version: number;
+    /** the code of the linhvuckt */
+    maLinhVuc: string;
+    /** the name of the linhvuckt */
+    tenLinhVuc: string;
+    /** the level of the linhvuckt */
+    capLinhvuckt: number;
+    /** the path of the linhvuckt */
+    path: string;
+    /** the parent id of the linhvuckt */
+    idLinhVucCha: number;
+    /** the date modified of the linhvuckt */
+    modified: string;
+    /** the modifier of the linhvuckt */
+    modifier: string;
+    /** the status of the linhvuckt */
+    status: string;
+    /** check mark*/
+    checked: boolean;
+}

@@ -1,0 +1,278 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { ReportTargetForm } from './reportTarget-form.component';
+
+import { ReportTargetService } from './reportTarget.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { ReportTarget } from './ReportTarget';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { PageInfo } from '../../../common/util/page-info';
+
+@Component({
+    selector: 'app-reportTarget-list',
+    templateUrl: './reportTarget-list.component.html',
+    providers: [ReportTargetService, DialogService, DataTable]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'ReportTarget'
+ */
+export class ReportTargetListComponent implements OnInit {
+    // reportTarget page
+    reportTargetInfo: PageInfo<ReportTarget[]>;
+    // list reportTarget 
+    reportTargets: ReportTarget[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page sizw
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: ReportTarget;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    constructor(
+        private reportTargetService: ReportTargetService,
+        private dialogService: DialogService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) { this.toastr.setRootViewContainerRef(vcr); }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = ReportTargetForm.reportTargetForm(this.fb, '');
+        // initialize object
+        this.searchObject = new ReportTarget();
+        // get datas.
+        this.getPageReportTarget(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param reportTarget: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageReportTarget(reportTarget: ReportTarget, page: number) {
+        this.searchObject = reportTarget;
+        this.reportTargetService.getPageReportTarget(reportTarget, page)
+            .then(response => {
+                this.reportTargetInfo = response.data;
+                this.reportTargets = this.reportTargetInfo.content;
+                this.pageLength = this.reportTargetInfo.content.length;
+                this.totalElements = this.reportTargetInfo.totalElements;
+                this.totalPages = this.reportTargetInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(
+                error => {
+                    console.log(error);
+                });
+    }
+    
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page) {
+        debugger;
+        var flag = true;
+        var pageNumber;
+
+        if(page.valueAsNumber != null) {
+            if(isNaN(page.valueAsNumber)) {
+                flag = false;
+                page.value = this.currentPage + 1;
+                // this.currentPageView = 1;
+            } else {
+                pageNumber = page.value - 1;
+            }
+        } else {
+            pageNumber = page;
+        }
+
+        if (flag == true && this.currentPage > pageNumber && pageNumber < 0) {
+            pageNumber = 0;
+        }
+        if (flag == true && this.currentPage < pageNumber && pageNumber > this.totalPages-1) {
+            pageNumber = this.totalPages-1;
+        }
+        if (flag == true && !Number.isInteger(pageNumber)) {
+            flag = false;
+            page.value = this.currentPage + 1;
+        }
+        // console.log(flag);
+        // console.log(pageNumber);
+        if (flag == true) {
+            
+            this.currentPage = pageNumber;
+            this.getPageReportTarget(this.searchObject, this.currentPage);
+            // this.currentPageView = pageNumber + 1;
+            page.value = pageNumber + 1;
+        }
+    }
+    private setCurrentPage() {
+        if (this.reportTargetInfo.numberOfElements > 0) {
+            this.currentPageView = this.reportTargetInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.reportTargetInfo.numberOfElements;
+        var size = this.reportTargetInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param reportTargetId 
+     */
+    delete(id: number) {
+        var entityIds = [];
+        entityIds.push(id);
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.reportTargetService.deleteCountriesById(entityIds)
+                        .then(response => {
+                            let message;
+                            this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.success('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                            this.getPageReportTarget(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.reportTargets.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.reportTargets.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+        if (entityIds.length > 0) {
+            this.dialogService.confirm()
+                .subscribe(response => {
+                    if (response == true) {
+                        this.reportTargetService.deleteCountriesById(entityIds)
+                            .then(response => {
+                                let message;
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.checkAllItemFlag = false;
+                                this.getPageReportTarget(this.searchObject, this.currentPage);
+                                this.numberDeleteItems = 0;
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            })
+                            .catch(error => {
+                                let message;
+                                this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.numberDeleteItems = 0;
+                                this.checkAllItemFlag = false;
+                                this.getPageReportTarget(this.searchObject, this.currentPage);
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            });
+                    }
+                })
+        }
+    }
+
+    exportExcel() {
+        window.open(this.reportTargetService.ReportTargetApi + "/export-excel", "_blank");
+    }
+
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.reportTargets.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+}

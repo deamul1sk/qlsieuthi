@@ -1,0 +1,56 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Country } from './country';
+
+/**
+ * @description: Define the country form. Use for enter data of the country object
+ */
+export class CountryForm {
+    /**
+     * @description Define the country form
+     * @param fb 
+     */
+    static countryForm(fb: FormBuilder, business: string): FormGroup {
+        var countryForm: FormGroup;
+
+        countryForm = fb.group({
+            id: "",
+            countryCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            countryName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(50),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            englishName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(50),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+        });
+        return countryForm;
+    }
+
+    /**
+     * @description : set the inital value for the form
+     * @param countryForm : country form
+     * @param country : Data used to set up for form
+     */
+    static bindingData(countryForm: FormGroup, country: Country) {
+        
+        countryForm.patchValue({
+            id: country.id,
+            countryCode: country.countryCode,
+            countryName: country.countryName,
+            englishName: country.englishName,
+            status: country.status
+        });
+        
+    }
+}

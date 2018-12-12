@@ -1,0 +1,161 @@
+import { Injectable } from '@angular/core';
+import { Http, Headers } from '@angular/http';
+
+import 'rxjs/add/operator/toPromise';
+
+import { Constants } from '../../../common/util/constants';
+import { Currency } from './Currency';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../../../authentication/guard/authentication.service';
+import { CommonService } from '../../../common/util/common-service/common.service';
+import { HeaderField } from '../../../common/util/header-field';
+import { HeaderValue } from '../../../common/util/header-value';
+
+/**
+ * Examine the handling  of business requirements with Currency module
+ */
+@Injectable()
+export class CurrencyService extends CommonService {
+
+    /**  the api url */
+    CurrencyApi = Constants.API_URL + "currencies";
+
+    constructor(
+        private http: Http,
+        router: Router
+    ) {
+        super(router)
+    }
+
+    /**
+     * @description create a new currency
+     * @param currency the new currency
+     */
+    create(currency: Currency): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.post(this.CurrencyApi,
+            JSON.stringify(currency), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+   * @description get page currency
+   * @param currency the search restriction
+   * @param page the paging restriction
+   */
+  searchCurrency(currency: Currency, page: number): Promise<any> {
+    let accessToken = this.getAccessToken();
+    var secureHeaders = new Headers();
+    secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+    secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+    var promise = this.http.post(this.CurrencyApi + "/search?page=" + page + "&size=" + Constants.PAGE_SIZE + "&type=1",
+    currency, { headers: secureHeaders })
+        .toPromise()
+        .then(response => response.json() as any)
+        .catch(error => {
+            return this.handleError(error);
+        });
+    return promise;
+}
+
+    /**
+     * @description update the currency
+     * @param currency the new currency
+     */
+    update(currency: Currency): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.put(this.CurrencyApi,
+            JSON.stringify(currency), { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.status as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description delete currencies by id
+     * @param entityIds the list id 
+     */
+    deleteCurrencysById(entityIds: number[]): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var test = JSON.stringify(entityIds);
+        var promise = this.http.delete(this.CurrencyApi + "/delete-multiple/"+entityIds, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+   * @description get page currency
+   * @param currency the search restriction
+   * @param page the paging restriction
+   */
+    getPageCurrency(currency: Currency,page: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.CurrencyApi + "/?page=" + page+"&size="+Constants.PAGE_SIZE+"&type=1", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description get list currency
+     */
+    getListCurrency(): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        // secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.CurrencyApi + "/all?type=-1", { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+    /**
+     * @description hàm trả về thông tin 1 Currency
+     * @param id id của Currency
+     */
+    findOne(id: number): Promise<any> {
+        let accessToken = this.getAccessToken();
+        var secureHeaders = new Headers();
+        secureHeaders.append(HeaderField.AUTHORIZATION, accessToken);
+        secureHeaders.append(HeaderField.CONTENT_TYPE, HeaderValue.APPLICATION_JSON_VALUE);
+        var promise = this.http.get(this.CurrencyApi + "/" + id, { headers: secureHeaders })
+            .toPromise()
+            .then(response => response.json() as any)
+            .catch(error => {
+                return this.handleError(error);
+            });
+        return promise;
+    }
+
+}

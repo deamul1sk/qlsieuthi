@@ -1,0 +1,210 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { DistrictService } from '../district.service';
+import { DistrictForm } from '../district-form.component';
+import { Province } from '../../province/province';
+import { ProvinceService } from '../../province/province.service';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-district-business',
+  templateUrl: './district-business.component.html',
+  providers: [DistrictService, ProvinceService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class DistrictBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  districtForm: FormGroup;
+  district: any;
+
+  isUpdate: boolean = true;
+
+  listProvince: Province[];
+
+  provinceSelections: Array<any> = [];
+
+  indexProvinceSelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private districtService: DistrictService,
+    private provinceService: ProvinceService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.districtForm = DistrictForm.districtForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+        this.getListProvince();
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.districtForm, this.id);
+      }
+    });
+  }
+
+  bindingData(districtForm, id) {
+    this.districtService.findOne(id)
+      .then(response => {
+        debugger
+        this.district = response.data;
+        this.getListProvince();
+        DistrictForm.bindingData(districtForm, this.district);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param district : truyền object cần chỉnh sửa.
+   */
+  submit(district) {
+    if (this.isUpdate) {
+      this.updateDistrict(district);
+    } else {
+      this.createDistrict(district);
+    }
+  }
+
+  createDistrict(district) {
+    this.districtService.create(district)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateDistrict(district) {
+    this.districtService.update(district)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.districtForm.get('districtCode').invalid) {
+      if (this.districtForm.get('districtCode').errors.required) {
+        return false;
+      }
+      if (this.districtForm.get('districtCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.districtForm.get('districtCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check district name is valid
+    if (this.districtForm.get('districtName').invalid) {
+      if (this.districtForm.get('districtName').errors.required) {
+        return false;
+      }
+      if (this.districtForm.get('districtName').errors.pattern != null) {
+        return false;
+      }
+      if (this.districtForm.get('districtName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check province is valid
+    if (this.districtForm.get('province.id').invalid) {
+      if (this.districtForm.get('province.id').errors.required) {
+        return false;
+      }
+      if (this.districtForm.get('province.id').errors.min != null) {
+        return false;
+      }
+    }
+    // check province is valid
+    if (this.districtForm.get('countNumber').invalid) {
+      if (this.districtForm.get('countNumber').errors.min != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private getListProvince() {
+    this.provinceService.getListProvince()
+      .then(response => {
+        this.listProvince = response.data;
+        this.initializeProvinceSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeProvinceSelection() {
+    let province_datas = [];
+    var countItems = 0;
+    if (this.listProvince != null && this.listProvince != undefined) {
+      this.listProvince.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.provinceName;
+        item.id = element.id;
+        province_datas.push(item);
+        if (this.district != undefined && this.district != null && item.id == this.district.province.id) {
+          this.indexProvinceSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.provinceSelections = province_datas;
+    console.log(this.provinceSelections);
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

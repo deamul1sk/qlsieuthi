@@ -1,0 +1,394 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UserForm } from './user-form.component';
+
+import { UserService } from './user.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { User } from './User';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { DistrictService } from '../../categories/district/district.service';
+import { ProvinceService } from '../../categories/province/province.service';
+import { WardService } from '../../categories/ward/ward.service';
+import { NationService } from '../../categories/nation/nation.service';
+import { OrganizationService } from '../../categories/organization/organization.service';
+import { District } from '../../categories/district/district';
+import { Province } from '../../categories/province/Province';
+import { Ward } from '../../categories/ward/ward';
+import { Nation } from '../../categories/nation/nation';
+import { Organization } from '../../categories/organization/organization';
+import { PageInfo } from '../../../common/util/page-info';
+
+@Component({
+    selector: 'app-user-list',
+    templateUrl: './user-list.component.html',
+    providers: [UserService, DialogService, DataTable, DistrictService,
+        ProvinceService, WardService, NationService, OrganizationService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'User'
+ */
+export class UserListComponent implements OnInit {
+    // user page
+    userInfo: PageInfo<User[]>;
+    // list user 
+    users: User[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page size
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: User;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listDistrict: District[];
+    districtSelections: Array<any> = [];
+    indexDistrictSelection: number;
+
+    listProvince: Province[];
+    provinceSelections: Array<any> = [];
+    indexProvinceSelection: number;
+
+    listWard: Ward[];
+    wardSelections: Array<any> = [];
+
+    listNation: Nation[];
+    nationSelections: Array<any> = [];
+
+    listOrganization: Organization[];
+    organizationSelections: Array<any> = [];
+
+    constructor(
+        private userService: UserService,
+        private districtService: DistrictService,
+        private provinceService: ProvinceService,
+        private wardService: WardService,
+        private nationService: NationService,
+        private organizationService: OrganizationService,
+        private dialogService: DialogService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) { this.toastr.setRootViewContainerRef(vcr); }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = UserForm.userForm(this.fb, '');
+        // initialize object
+        this.searchObject = new User();
+        // get list district
+ 
+        // get list province
+        this.getListProvince();
+        // get datas.
+        this.getPageUser(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param user: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageUser(user: User, page: number) {
+        this.searchObject = user;
+        this.userService.getPageUser(user, page)
+            .then(response => {
+                console.log(response.data);
+                this.userInfo = response.data;
+                this.users = this.userInfo.content;
+                this.pageLength = this.userInfo.content.length;
+                this.totalElements = this.userInfo.totalElements;
+                this.totalPages = this.userInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page) {
+        debugger;
+        var flag = true;
+        var pageNumber;
+
+        if(page.valueAsNumber != null) {
+            if(isNaN(page.valueAsNumber)) {
+                flag = false;
+                page.value = this.currentPage + 1;
+                // this.currentPageView = 1;
+            } else {
+                pageNumber = page.value - 1;
+            }
+        } else {
+            pageNumber = page;
+        }
+
+        if (flag == true && this.currentPage > pageNumber && pageNumber < 0) {
+            pageNumber = 0;
+        }
+        if (flag == true && this.currentPage < pageNumber && pageNumber > this.totalPages-1) {
+            pageNumber = this.totalPages-1;
+        }
+        if (flag == true && !Number.isInteger(pageNumber)) {
+            flag = false;
+            page.value = this.currentPage + 1;
+        }
+        if (flag == true) {
+            
+            this.currentPage = pageNumber;
+            this.getPageUser(this.searchObject, this.currentPage);
+            page.value = pageNumber + 1;
+        }
+    }
+
+    private setCurrentPage() {
+        if (this.userInfo.numberOfElements > 0) {
+            this.currentPageView = this.userInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.userInfo.numberOfElements;
+        var size = this.userInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param userId 
+     */
+    delete(userId: number) {
+        console.log(userId);
+        var listUserId = [];
+        listUserId.push(userId);
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.userService.deleteUsersById(listUserId)
+                        .then(response => {
+                            let message;
+                            this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.success('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                            this.getPageUser(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.users.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var listUserId = [];
+        this.users.forEach(item => {
+            if (item.checked == true) {
+                listUserId.push(item.userId);
+            }
+        });
+        if (listUserId.length > 0) {
+            this.dialogService.confirm()
+                .subscribe(response => {
+                    if (response == true) {
+                        this.userService.deleteUsersById(listUserId)
+                            .then(response => {
+                                let message;
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.checkAllItemFlag = false;
+                                this.getPageUser(this.searchObject, this.currentPage);
+                                this.numberDeleteItems = 0;
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            })
+                            .catch(error => {
+                                let message;
+                                this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.numberDeleteItems = 0;
+                                this.checkAllItemFlag = false;
+                                this.getPageUser(this.searchObject, this.currentPage);
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            });
+                    }
+                })
+        }
+    }
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.users.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+
+    private getListDistrict() {
+        this.districtService.getListDistrict()
+          .then(response => {
+            this.listDistrict = response.data;
+            this.initializeDistrictSelection(0);
+          }).catch(error => {
+            console.log(error);
+          });
+      }
+
+      private getListDistrictByProvinceId(id: number) {
+        this.districtService.getListDistrictByProvinceId(id)
+          .then(response => {
+            this.listDistrict = response.data;
+            this.initializeDistrictSelection(0);
+          }).catch(error => {
+            console.log(error);
+          });
+      }
+
+      private initializeDistrictSelection(selectItem: number) {
+        let district_datas = [];
+        var countItems = 0;
+        if (this.listDistrict != null && this.listDistrict != undefined) {
+          this.indexDistrictSelection = null;
+          this.listDistrict.forEach(element => {
+            var item = {
+              id: null, text: null
+            };
+            item.text = element.districtName;
+            item.id = element.id;
+            district_datas.push(item);
+            if (item.id == selectItem) {
+              this.indexDistrictSelection = countItems;
+            }
+            countItems += 1;
+          });
+        }
+        this.districtSelections = district_datas;
+      }
+
+      districtChanged(id: number) {
+        this.filterForm.get('district.id').setValue(id);
+      }
+
+      private getListProvince() {
+        this.provinceService.getListProvince()
+          .then(response => {
+            this.listProvince = response.data;
+            this.initializeProvinceSelection(0);
+          }).catch(error => {
+            console.log(error);
+          });
+      }
+
+      private initializeProvinceSelection(selectItem: number) {
+        let province_datas = [];
+        var countItems = 0;
+        if (this.listProvince != null && this.listProvince != undefined) {
+          this.indexProvinceSelection = null;
+          this.listProvince.forEach(element => {
+            var item = {
+              id: null, text: null
+            };
+            item.text = element.provinceName;
+            item.id = element.id;
+            province_datas.push(item);
+            if (item.id == selectItem) {
+              this.indexProvinceSelection = countItems;
+            }
+            countItems += 1;
+          });
+        }
+        
+        this.provinceSelections = province_datas;
+    }
+
+    provinceChanged(id: number) {
+        this.filterForm.get('province.id').setValue(id);
+        this.getListDistrictByProvinceId(id);
+    }
+
+    exportExcel() {
+        window.open(this.userService.UserApi + "/export-excel", "_blank");
+    }
+
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+}

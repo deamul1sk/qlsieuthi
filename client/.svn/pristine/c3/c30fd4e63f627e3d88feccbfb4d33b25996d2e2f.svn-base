@@ -1,0 +1,94 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.User' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.MaDonVi'|translate}}</label>
+                                        <div class="col-md-8">{{user?.usercode}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.TenDonVi'|translate}}</label>
+                                        <div class="col-md-8">{{user?.username}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Province.Title'|translate}}</label>
+                                        <div class="col-md-8">{{user?.province.provinceName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'District.Title'|translate}}</label>
+                                        <div class="col-md-8">{{user?.district.districtName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Ward.Title'|translate}}</label>
+                                        <div class="col-md-8">{{user?.ward.wardName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Nation.Title'|translate}}</label>
+                                        <div class="col-md-8">{{user?.nation.nationName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'Organization.Title'|translate}}</label>
+                                        <div class="col-md-8">{{user?.organization.organizationName}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.DiaChi'|translate}}</label>
+                                        <div class="col-md-8">{{user?.diaChi}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.NguoiDaiDien'|translate}}</label>
+                                        <div class="col-md-8">{{user?.nguoiDaiDien}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.SoDienThoai'|translate}}</label>
+                                        <div class="col-md-8">{{user?.soDienThoai}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.Email'|translate}}</label>
+                                        <div class="col-md-8">{{user?.email}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.Fax'|translate}}</label>
+                                        <div class="col-md-8">{{user?.fax}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.Modifier'|translate}}</label>
+                                        <div class="col-md-8">{{user?.modifier}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{user?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.Version'|translate}}</label>
+                                        <div class="col-md-8">{{user?.version}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'User.Status'|translate}}</label>
+                                        <div class="col-md-8">{{user?.status==1?'Active':'Inactive'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

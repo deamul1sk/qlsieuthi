@@ -1,0 +1,338 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ResponseMessageComponent } from '../../../common/util/response-message/response-message.component';
+import { DepartmentForm } from './department-form.component';
+
+import { DepartmentService } from './department.service';
+import { DialogService } from '../../../common/dialog/dialog.service';
+import { DataTable } from 'angular2-datatable';
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { AuthGuardSubmenu } from '../../../authentication/guard/auth.guard-submenu';
+import { Constants } from '../../../common/util/constants';
+import { Organization } from '../organization/organization';
+import { OrganizationService } from '../organization/organization.service';
+import { PageInfo } from '../../../common/util/page-info';
+import { Department } from './department';
+import { ExcelExportService } from '../../../common/util/common-service/excel.service';
+
+@Component({
+    selector: 'app-department-list',
+    templateUrl: './department-list.component.html',
+    providers: [DepartmentService, DialogService, DataTable, OrganizationService]
+})
+
+/**
+ * @description: Coordinator quản lý bảng 'Department'
+ */
+export class DepartmentListComponent implements OnInit {
+    // department page
+    departmentInfo: PageInfo<Department[]>;
+    // list department 
+    departments: Department[];
+    // total page
+    totalPages: number;
+    // curent page
+    currentPage = 0;
+    // page sizw
+    pageLength: number;
+    // toal elements
+    totalElements: number;
+    // >filter search.
+    filterForm: FormGroup;
+    // search restriction
+    searchObject: Department;
+    // >checker.
+    checkAllItemFlag = false;
+    currentPageView: number;
+    fromElement: number;
+    toElement: number;
+
+    numberDeleteItems = 0;
+
+    listStatus = Constants.STATUS_LIST;
+
+    listOrganization: Organization[];
+
+    organizationSelections: Array<any> = [];
+
+    constructor(
+        private departmentService: DepartmentService,
+        private exportExcelService: ExcelExportService,
+        private organizationService: OrganizationService,
+        private dialogService: DialogService,
+        private fb: FormBuilder,
+        private router: Router,
+        private translate: TranslateService,
+        private authGuardSubmenu: AuthGuardSubmenu,
+        public toastr: ToastsManager, vcr: ViewContainerRef
+    ) { this.toastr.setRootViewContainerRef(vcr); }
+
+    ngOnInit() {
+        // initialize forms.
+        this.filterForm = DepartmentForm.departmentForm(this.fb, '');
+        // initialize object
+        this.searchObject = new Department();
+        // get list organization
+        this.getListOrganization();
+        // get datas.
+        this.getPageDepartment(this.searchObject, this.currentPage);
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param department: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    searchDepartment(department: Department, page: number) {
+        this.searchObject = department;
+        this.departmentService.searchDepartment(department, page)
+            .then(response => {
+                this.departmentInfo = response.data;
+                this.departments = this.departmentInfo.content;
+                this.pageLength = this.departmentInfo.content.length;
+                this.totalElements = this.departmentInfo.totalElements;
+                this.totalPages = this.departmentInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Hàm tìm kiếm
+     * @param department: Thông tin tìm kiếm
+     * @param page: số trang muốn lấy
+     */
+    getPageDepartment(department: Department, page: number) {
+        this.searchObject = department;
+        this.departmentService.getPageDepartment(department, page)
+            .then(response => {
+                this.departmentInfo = response.data;
+                this.departments = this.departmentInfo.content;
+                this.pageLength = this.departmentInfo.content.length;
+                this.totalElements = this.departmentInfo.totalElements;
+                this.totalPages = this.departmentInfo.totalPages;
+                if (!(this.totalPages > 0)) {
+                    this.currentPage = -1;
+                }
+                this.setCurrentPage();
+                this.countNumberDeleteItems();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    /**
+     * @description: Coordinator quản lý việc chuyển trang
+     * @param page: số trang
+     */
+    choosePageNumber(page) {
+        debugger;
+        var flag = true;
+        var pageNumber;
+
+        if(page.valueAsNumber != null) {
+            if(isNaN(page.valueAsNumber)) {
+                flag = false;
+                page.value = this.currentPage + 1;
+                // this.currentPageView = 1;
+            } else {
+                pageNumber = page.value - 1;
+            }
+        } else {
+            pageNumber = page;
+        }
+
+        if (flag == true && this.currentPage > pageNumber && pageNumber < 0) {
+            pageNumber = 0;
+        }
+        if (flag == true && this.currentPage < pageNumber && pageNumber > this.totalPages-1) {
+            pageNumber = this.totalPages-1;
+        }
+        if (flag == true && !Number.isInteger(pageNumber)) {
+            flag = false;
+            page.value = this.currentPage + 1;
+        }
+        // console.log(flag);
+        // console.log(pageNumber);
+        if (flag == true) {
+            
+            this.currentPage = pageNumber;
+            this.getPageDepartment(this.searchObject, this.currentPage);
+            // this.currentPageView = pageNumber + 1;
+            page.value = pageNumber + 1;
+        }
+    }
+
+    exportExcel() {
+        window.open(this.departmentService.DepartmentApi + "/export-excel", "_blank");
+    }
+    private setCurrentPage() {
+        if (this.departmentInfo.numberOfElements > 0) {
+            this.currentPageView = this.departmentInfo.number + 1;
+        } else {
+            this.currentPageView = 0;
+        }
+        var numberOfElements = this.departmentInfo.numberOfElements;
+        var size = this.departmentInfo.size;
+        this.fromElement = (this.currentPageView - 1) * size + 1;
+        this.toElement = (this.currentPageView - 1) * size + numberOfElements;
+        if (this.toElement < 1) {
+            this.fromElement = 0;
+            this.toElement = 0;
+        }
+    }
+    /**
+     * @description: Dùng để xóa 1 bản ghi
+     * @param departmentId 
+     */
+    delete(id: number) {
+        var entityIds = [];
+        entityIds.push(id);
+        this.dialogService
+            .confirm()
+            .subscribe(response => {
+                if (response == true) {
+                    this.departmentService.deleteDepartmentsById(entityIds)
+                        .then(response => {
+                            debugger;
+                            let message;
+                            this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.success('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                                this.getPageDepartment(this.searchObject, this.currentPage);
+                        })
+                        .catch(error => {
+                            let message;
+                            this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                message = res;
+                            });
+                            this.toastr.error('', message, { dismiss: 'controlled' })
+                                .then((toast: Toast) => {
+                                    setTimeout(() => {
+                                        this.toastr.dismissToast(toast);
+                                    }, 3000);
+                                });
+                        });
+                }
+            })
+    }
+
+    /**
+     * @description: Check tất cả items khi click ô checkbox all.
+     */
+    checkAllItem() {
+        this.checkAllItemFlag = !this.checkAllItemFlag;
+        this.departments.forEach(item => {
+            item.checked = this.checkAllItemFlag;
+        });
+    }
+
+    /**
+     * @description: Xóa các items được chọn.
+     */
+    deleteCheckedItems() {
+        var entityIds = [];
+        this.departments.forEach(item => {
+            if (item.checked == true) {
+                entityIds.push(item.id);
+            }
+        });
+        if (entityIds.length > 0) {
+            this.dialogService.confirm()
+                .subscribe(response => {
+                    if (response == true) {
+                        this.departmentService.deleteDepartmentsById(entityIds)
+                            .then(response => {
+                                let message;
+                                this.translate.get('Message.DeleteSuccess').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.checkAllItemFlag = false;
+                                this.getPageDepartment(this.searchObject, this.currentPage);
+                                this.numberDeleteItems = 0;
+                                this.toastr.success('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            })
+                            .catch(error => {
+                                let message;
+                                this.translate.get('Message.DeleteFail').subscribe((res: string) => {
+                                    message = res;
+                                });
+                                this.numberDeleteItems = 0;
+                                this.checkAllItemFlag = false;
+                                this.getPageDepartment(this.searchObject, this.currentPage);
+                                this.toastr.error('', message, { dismiss: 'controlled' })
+                                    .then((toast: Toast) => {
+                                        setTimeout(() => {
+                                            this.toastr.dismissToast(toast);
+                                        }, 3000);
+                                    });
+                            });
+                    }
+                })
+        }
+    }
+    countNumberDeleteItems() {
+        this.numberDeleteItems = 0;
+        this.departments.forEach(item => {
+            if (item.checked == true) {
+                this.numberDeleteItems += 1;
+            }
+        });
+    }
+
+    getNumberDeleteItems(): number {
+        return this.numberDeleteItems;
+    }
+   
+    // To Authorize User
+    isAuthoriziedNavigation(): boolean {
+        var isAuthorizied = this.authGuardSubmenu.isAuthoriziedWithCurrentUrl(this.router.url);
+        return isAuthorizied;
+    }
+
+    private getListOrganization() {
+        this.organizationService.getListOrganization()
+            .then(response => {
+                this.listOrganization = response.data;
+                this.initializeOrganizationSelection();
+            }).catch(error => {
+                console.log(error);
+            });
+    }
+
+    private initializeOrganizationSelection() {
+        let department_datas = [];
+        if(this.listOrganization!=null&&this.listOrganization!=undefined){
+            this.listOrganization.forEach(element => {
+                var item = {
+                    id: null, text: null
+                };
+                item.text = element.organizationName;
+                item.id = element.id;
+                department_datas.push(item);
+            });
+        }
+        this.organizationSelections = department_datas;
+        console.log(this.organizationSelections);
+    }
+}

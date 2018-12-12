@@ -1,0 +1,74 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.LinhVucTTHC' | translate }} > {{ 'Action.Detail'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.LinhVucTTHCCode'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.code}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.LinhVucTTHCName'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.name}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Abbreviation'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.abbreviation}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Abbreviation'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.abbreviation}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.NO'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.no}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Description'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.description}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Created'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.created}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Creater'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.creater}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Modified'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.modified}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Modifier'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.modifier}}</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 text-right">{{'LinhVucTTHC.Status'|translate}}</label>
+                                        <div class="col-md-8">{{linhvuctthc?.status==1?'Active':'Inactive'}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

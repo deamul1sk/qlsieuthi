@@ -1,0 +1,60 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Linhvuckt } from './linhvuckt';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class LinhvucktForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static linhvucktForm(fb: FormBuilder, business: string): FormGroup {
+        var linhvucktForm: FormGroup;
+        
+        linhvucktForm = fb.group({
+            id: "",
+            maLinhVuc: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            tenLinhVuc: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            capLinhvuckt: [1, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            idLinhVucCha: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])]
+        });
+        return linhvucktForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param linhvuckt : đối tượng đích
+     */
+    static bindingData(linhvucktForm: FormGroup, linhvuckt: Linhvuckt) {
+        debugger;
+        linhvucktForm.setValue({
+            id: linhvuckt.id,
+            maLinhVuc: linhvuckt.maLinhVuc,
+            tenLinhVuc: linhvuckt.tenLinhVuc,
+            status: linhvuckt.status,
+            capLinhvuckt: linhvuckt.capLinhvuckt,
+            idLinhVucCha: linhvuckt.idLinhVucCha
+        });
+    }
+}

@@ -1,0 +1,96 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Employee.Title' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'Employee.Title' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="employeeForm" (ngSubmit)="submit(employeeForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="code">{{ 'Employee.Code' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="code" type="text" ng-trim="true" class="form-control" formControlName="code" placeholder="{{ 'Employee.Code' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="employeeForm.get('code').invalid && (employeeForm.get('code').touched)">
+                                                <span *ngIf="employeeForm.get('code').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!employeeForm.get('code').errors.required&&employeeForm.get('code').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!employeeForm.get('code').errors.required&&employeeForm.get('code').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 10
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="name">{{ 'Employee.Name' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="name" type="text" class="form-control" formControlName="name" placeholder="{{ 'Employee.Name' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="employeeForm.get('name').invalid && (employeeForm.get('name').touched)">
+                                                <span *ngIf="employeeForm.get('name').errors.required||employeeForm.get('name').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!employeeForm.get('name').errors.required&&employeeForm.get('name').errors.pattern!=null">
+                                                    {{ 'Message.Invalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!employeeForm.get('name').errors.required&&employeeForm.get('name').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                               
+                                <div class="col-md-6">
+                                    <div class="form-group" formGroupName="user">
+                                        <label class="control-label col-md-4" for="id">{{ 'Employee.UserName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                        <input type="hidden" required>
+                                        <ng-select [active]="indexUserSelection!=null?[userSelections[indexUserSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                                            [items]="userSelections" (selected)="employeeForm.get('user.id').setValue($event?.id)" (removed)="employeeForm.get('user.id').setValue(0)"
+                                            placeholder="{{ 'Employee.UserName' | translate }}" ngDefaultControl>
+                                        </ng-select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

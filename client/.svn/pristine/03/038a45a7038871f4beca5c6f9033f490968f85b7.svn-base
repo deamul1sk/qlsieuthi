@@ -1,0 +1,158 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.ReportTarget' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.ReportTarget' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="reportTargetForm" (ngSubmit)="submit(reportTargetForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="reportTargetCode">{{ 'ReportTarget.ReportTargetCode' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="reportTargetCode" type="text" ng-trim="true" class="form-control" formControlName="reportTargetCode" placeholder="{{ 'ReportTarget.ReportTargetCode' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="reportTargetForm.get('reportTargetCode').invalid && (reportTargetForm.get('reportTargetCode').touched)">
+                                                <span *ngIf="reportTargetForm.get('reportTargetCode').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!reportTargetForm.get('reportTargetCode').errors.required&&reportTargetForm.get('reportTargetCode').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!reportTargetForm.get('reportTargetCode').errors.required&&reportTargetForm.get('reportTargetCode').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 10
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="reportTargetName">{{ 'ReportTarget.ReportTargetName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="reportTargetName" type="text" class="form-control" formControlName="reportTargetName" placeholder="{{ 'ReportTarget.ReportTargetName' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="reportTargetForm.get('reportTargetName').invalid && (reportTargetForm.get('reportTargetName').touched)">
+                                                <span *ngIf="reportTargetForm.get('reportTargetName').errors.required||reportTargetForm.get('reportTargetName').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!reportTargetForm.get('reportTargetName').errors.required&&reportTargetForm.get('reportTargetName').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 100
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="reportTargetLevel">{{ 'ReportTarget.ReportTargetLevel' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="reportTargetLevel" type="number" (change)="levelChanged(level.value)" #level min="1" max="10" class="form-control" formControlName="reportTargetLevel" placeholder="{{'ReportTarget.ReportTargetLevel' | translate}}"
+                                            />
+                                            <small class="error" *ngIf="reportTargetForm.get('reportTargetLevel').invalid 
+                                                                  && (reportTargetForm.get('reportTargetLevel').touched)">
+                                                <span *ngIf="reportTargetForm.get('reportTargetLevel').errors.required||reportTargetForm.get('reportTargetLevel').errors.min!=null">
+                                                    {{ 'Message.NumberInvalid' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="parentReportTargetId">{{ 'ReportTarget.ParentReportTarget' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <ng-select [active]="indexReportTargetSelection!=null?[reportTargetSelections[indexReportTargetSelection]]:''" [allowClear]="true"
+                                                [disabled]="disabled" [items]="reportTargetSelections" (selected)="reportTargetForm.get('parentReportTargetId').setValue($event?.id)"
+                                                (removed)="reportTargetForm.get('parentReportTargetId').setValue(0)" placeholder="{{ 'ReportTarget.ParentReportTarget' | translate }}"
+                                                ngDefaultControl>
+                                            </ng-select>
+                                            <small class="error" *ngIf="reportTargetForm.get('parentReportTargetId').invalid 
+                                                                        && (reportTargetForm.get('parentReportTargetId').touched)">
+                                                <span *ngIf="reportTargetForm.get('parentReportTargetId').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="reportTargetForm.get('parentReportTargetId').errors.min!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group" formGroupName="linhvuckt">
+                                        <label class="control-label col-md-4" for="id">{{ 'Linhvuckt.Title' | translate }}
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <ng-select [active]="indexLinhvucktSelection!=null?[linhvucktSelections[indexLinhvucktSelection]]:''" [allowClear]="true"
+                                                [disabled]="disabled" [items]="linhvucktSelections" (selected)="reportTargetForm.get('linhvuckt.id').setValue($event?.id)"
+                                                (removed)="reportTargetForm.get('linhvuckt.id').setValue(0)" placeholder="{{ 'Linhvuckt.Title' | translate }}"
+                                                ngDefaultControl>
+                                            </ng-select>
+                                            <small class="error" *ngIf="reportTargetForm.get('linhvuckt.id').invalid 
+                                                                        && (reportTargetForm.get('linhvuckt.id').touched)">
+                                                <span *ngIf="reportTargetForm.get('linhvuckt.id').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="reportTargetForm.get('linhvuckt.id').errors.min!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" *ngIf="isUpdate===true">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="status">{{'ReportTarget.Status'|translate}}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <select class="form-control" formControlName="status" autofocus>
+                                                <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                                            </select>
+                                            <small class="error" *ngIf="reportTargetForm.get('status').invalid 
+                                      && (reportTargetForm.get('status').touched)">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

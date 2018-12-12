@@ -1,0 +1,203 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { DepartmentService } from '../department.service';
+import { DepartmentForm } from '../department-form.component';
+import { Organization } from '../../organization/organization';
+import { OrganizationService } from '../../organization/organization.service';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-department-business',
+  templateUrl: './department-business.component.html',
+  providers: [DepartmentService, OrganizationService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class DepartmentBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  departmentForm: FormGroup;
+  department: any;
+
+  isUpdate: boolean = true;
+
+  listOrganization: Organization[];
+
+  organizationSelections: Array<any> = [];
+
+  indexOrganizationSelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private departmentService: DepartmentService,
+    private organizationService: OrganizationService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.departmentForm = DepartmentForm.departmentForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+        this.getListOrganization();
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.departmentForm, this.id);
+        this.getListOrganization();
+      }
+    });
+  }
+
+  bindingData(departmentForm, id) {
+    this.departmentService.findOne(id)
+      .then(response => {
+        this.department = response.data;
+        DepartmentForm.bindingData(departmentForm, this.department);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param department : truyền object cần chỉnh sửa.
+   */
+  submit(department) {
+    if (this.isUpdate) {
+      this.updateDepartment(department);
+    } else {
+      this.createDepartment(department);
+    }
+  }
+
+  createDepartment(department) {
+    this.departmentService.create(department)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateDepartment(department) {
+    this.departmentService.update(department)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.departmentForm.get('departmentCode').invalid) {
+      if (this.departmentForm.get('departmentCode').errors.required) {
+        return false;
+      }
+      if (this.departmentForm.get('departmentCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.departmentForm.get('departmentCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check department name is valid
+    if (this.departmentForm.get('departmentName').invalid) {
+      if (this.departmentForm.get('departmentName').errors.required) {
+        return false;
+      }
+      if (this.departmentForm.get('departmentName').errors.pattern != null) {
+        return false;
+      }
+      if (this.departmentForm.get('departmentName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check organization is valid
+    if (this.departmentForm.get('organization.id').invalid) {
+      if (this.departmentForm.get('organization.id').errors.required) {
+        return false;
+      }
+      if (this.departmentForm.get('organization.id').errors.min != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private getListOrganization() {
+    this.organizationService.getListOrganization()
+      .then(response => {
+        this.listOrganization = response.data;
+        this.initializeOrganizationSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeOrganizationSelection() {
+    let organization_datas = [];
+    var countItems = 0;
+    if (this.listOrganization != null && this.listOrganization != undefined) {
+      this.listOrganization.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.organizationName;
+        item.id = element.id;
+        organization_datas.push(item);
+        if (this.department != undefined && this.department != null && item.id == this.department.organization.id) {
+          this.indexOrganizationSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.organizationSelections = organization_datas;
+    console.log(this.organizationSelections);
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

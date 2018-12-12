@@ -1,0 +1,64 @@
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { District } from './district';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class DistrictForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static districtForm(fb: FormBuilder, business: string): FormGroup {
+        var districtForm: FormGroup;
+
+        districtForm = fb.group({
+            id: "",
+            districtCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            districtName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(150),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+            countNumber: [0, Validators.compose([
+                Validators.required,
+                Validators.min(1)
+            ])],
+            province: fb.group({
+                id: [0, Validators.compose([
+                    Validators.required,
+                    Validators.min(1)
+                ])]
+            }),
+        });
+        return districtForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param district : đối tượng đích
+     */
+    static bindingData(districtForm: FormGroup, district: District) {
+        debugger;
+        districtForm.patchValue({
+            id: district.id,
+            districtCode: district.districtCode,
+            districtName: district.districtName,
+            status: district.status,
+            countNumber: district.countNumber,
+            province: {
+                id: district.province.id
+            }
+        });
+    }
+}

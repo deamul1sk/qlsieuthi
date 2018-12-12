@@ -1,0 +1,208 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { LinhvucktService } from '../linhvuckt.service';
+import { LinhvucktForm } from '../linhvuckt-form.component';
+import { Constants } from '../../../../common/util/constants';
+import { DmdvkiemtoanService } from '../../dmdvkiemtoan/dmdvkiemtoan.service';
+import { Linhvuckt } from '../linhvuckt';
+
+@Component({
+  selector: 'app-linhvuckt-business',
+  templateUrl: './linhvuckt-business.component.html',
+  providers: [LinhvucktService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class LinhvucktBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  linhvucktForm: FormGroup;
+  linhvuckt: any;
+
+  isUpdate: boolean = true;
+
+  listLinhvuckt: Linhvuckt[];
+  linhvucktSelections: Array<any> = [];
+  indexLinhvucktSelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private linhvucktService: LinhvucktService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.linhvucktForm = LinhvucktForm.linhvucktForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+        this.getListLinhvucktByLevel(0);
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.linhvucktForm, this.id);
+      }
+    });
+  }
+
+  bindingData(linhvucktForm, id) {
+    this.linhvucktService.findOne(id)
+      .then(response => {
+        this.linhvuckt = response.data;
+        this.getListLinhvucktByLevel(0);
+        LinhvucktForm.bindingData(linhvucktForm, this.linhvuckt);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param linhvuckt : truyền object cần chỉnh sửa.
+   */
+  submit(linhvuckt) {
+    if (this.isUpdate) {
+      this.updateLinhvuckt(linhvuckt);
+    } else {
+      this.createLinhvuckt(linhvuckt);
+    }
+  }
+
+  createLinhvuckt(linhvuckt) {
+    this.linhvucktService.create(linhvuckt)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateLinhvuckt(linhvuckt) {
+    this.linhvucktService.update(linhvuckt)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.linhvucktForm.get('maLinhVuc').invalid) {
+      if (this.linhvucktForm.get('maLinhVuc').errors.required) {
+        return false;
+      }
+      if (this.linhvucktForm.get('maLinhVuc').errors.pattern != null) {
+        return false;
+      }
+      if (this.linhvucktForm.get('maLinhVuc').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check linhvuckt name is valid
+    if (this.linhvucktForm.get('tenLinhVuc').invalid) {
+      if (this.linhvucktForm.get('tenLinhVuc').errors.required) {
+        return false;
+      }
+      if (this.linhvucktForm.get('tenLinhVuc').errors.pattern != null) {
+        return false;
+      }
+      if (this.linhvucktForm.get('tenLinhVuc').errors.maxlength != null) {
+        return false;
+      }
+    }
+
+    // check level is valid
+    if (this.linhvucktForm.get('capLinhvuckt').invalid) {
+      if (this.linhvucktForm.get('capLinhvuckt').errors.required) {
+        return false;
+      }
+      if (this.linhvucktForm.get('capLinhvuckt').errors.min != null) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private getListLinhvucktByLevel(level: number) {
+    this.linhvucktService.getListLinhvucktByLevel(level)
+      .then(response => {
+        this.listLinhvuckt = response.data;
+        this.initializeLinhvucktSelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeLinhvucktSelection() {
+    let linhvuckt_datas = [];
+    var countItems = 0;
+    if (this.listLinhvuckt != null && this.listLinhvuckt != undefined) {
+      this.listLinhvuckt.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.tenLinhVuc;
+        item.id = element.id;
+        linhvuckt_datas.push(item);
+        if (this.linhvuckt != undefined && this.linhvuckt != null && item.id == this.linhvuckt.idLinhVucCha) {
+          this.indexLinhvucktSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.linhvucktSelections = linhvuckt_datas;
+    console.log(this.linhvucktSelections);
+  }
+
+  levelChanged(level: number){
+    if(level>1){
+      this.getListLinhvucktByLevel(level-1);
+    }
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

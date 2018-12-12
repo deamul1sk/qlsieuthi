@@ -1,0 +1,62 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Profession } from './profession';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class ProfessionForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static professionForm(fb: FormBuilder, business: string): FormGroup {
+        var professionForm: FormGroup;
+        
+        professionForm = fb.group({
+            id: "",
+            code: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            name: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(256),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            abbreviation: ["", Validators.compose([
+                Validators.maxLength(256)
+            ])],
+            no: [0, Validators.compose([
+                Validators.maxLength(10)
+            ])],
+            description: ["", Validators.compose([
+                Validators.maxLength(1024)
+            ])],
+            status: [1, Validators.compose([
+                Validators.required,
+                Validators.maxLength(10)
+            ])],
+        });
+        return professionForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param profession : đối tượng đích
+     */
+    static bindingData(professionForm: FormGroup, profession: Profession) {
+        professionForm.setValue({
+            id: profession.id,
+            code: profession.code,
+            name: profession.name,
+            abbreviation: profession.abbreviation,
+            no: profession.no,
+            description: profession.description,
+            status: profession.status,
+        });
+    }
+}

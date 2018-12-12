@@ -1,0 +1,360 @@
+<div class="row">
+  <div class="col-md-12">
+    <!-- BEGIN EXAMPLE TABLE PORTLET-->
+    <div class="portlet box grey-cascade">
+      <div class="portlet-title">
+        <div class="caption" *ngIf="isUpdate===true">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.User' | translate }} > {{ 'Action.Update' | translate }}
+        </div>
+        <div class="caption" *ngIf="isUpdate===false">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.User' | translate }} > {{ 'Action.Create' | translate }}
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+            <form class="form-horizontal align-middle" [formGroup]="userForm" (ngSubmit)="submit(userForm.value)">
+              <div class="row">
+                <div class="col-md-6">
+                  <input id="userId" type="hidden" class="form-control" formControlName="userId" />
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="usercode">{{ 'User.UserCode' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="usercode" type="text" ng-trim="true" class="form-control" formControlName="usercode" placeholder="{{ 'User.UserCode' | translate }}"
+                      />
+                      <small class="error" *ngIf="userForm.get('usercode').invalid && (userForm.get('usercode').touched)">
+                        <span *ngIf="userForm.get('usercode').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('usercode').errors.required&&userForm.get('usercode').errors.pattern!=null">
+                          {{ 'Message.CodeInvalid' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('usercode').errors.required&&userForm.get('usercode').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 10
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="username">{{ 'User.UserName' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="username" type="text" class="form-control" formControlName="username" placeholder="{{ 'User.UserName' | translate }}"
+                      />
+                      <small class="error" *ngIf="userForm.get('username').invalid && (userForm.get('username').touched)">
+                        <span *ngIf="userForm.get('username').errors.required||userForm.get('username').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('username').errors.required&&userForm.get('username').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="organization">
+                    <label class="control-label col-md-4" for="id">{{ 'Organization.Title' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexOrganizationSelection!=null?[organizationSelections[indexOrganizationSelection]]:''" [allowClear]="true"
+                        [disabled]="disabled" [items]="organizationSelections" (selected)="userForm.get('organization.id').setValue($event?.id)"
+                        (removed)="userForm.get('organization.id').setValue(0)" placeholder="{{ 'Organization.ChooseOrganization' | translate }}"
+                        ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('organization.id').invalid 
+                                        && (userForm.get('organization.id').touched)">
+                        <span *ngIf="userForm.get('organization.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('organization.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="province">
+                    <label class="control-label col-md-4" for="id">{{ 'Province.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexProvinceSelection!=null?[provinceSelections[indexProvinceSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="provinceSelections" (selected)="provinceChanged($event?.id)" (removed)="provinceChanged(0)"
+                        placeholder="{{ 'Province.ChooseProvince' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('province.id').invalid 
+                                        && (userForm.get('province.id').touched)">
+                        <span *ngIf="userForm.get('province.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('province.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="district">
+                    <label class="control-label col-md-4" for="id">{{ 'District.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexDistrictSelection!=null?[districtSelections[indexDistrictSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="districtSelections" (selected)="districtChanged($event?.id)" (removed)="districtChanged(0)"
+                        placeholder="{{ 'District.ChooseDistrict' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('district.id').invalid 
+                                    && (userForm.get('district.id').touched)">
+                        <span *ngIf="userForm.get('district.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('district.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="ward">
+                    <label class="control-label col-md-4" for="id">{{ 'Ward.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexWardSelection!=null?[wardSelections[indexWardSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="wardSelections" (selected)="wardChanged($event?.id)" (removed)="wardChanged(0)" placeholder="{{ 'Ward.ChooseWard' | translate }}"
+                        ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('ward.id').invalid 
+                                        && (userForm.get('ward.id').touched)">
+                        <span *ngIf="userForm.get('ward.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('ward.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="nation">
+                    <label class="control-label col-md-4" for="id">{{ 'Nation.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexNationSelection!=null?[nationSelections[indexNationSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="nationSelections" (selected)="userForm.get('nation.id').setValue($event?.id)" (removed)="userForm.get('nation.id').setValue(0)"
+                        placeholder="{{ 'Nation.ChooseNation' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('nation.id').invalid 
+                                        && (userForm.get('nation.id').touched)">
+                        <span *ngIf="userForm.get('nation.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('nation.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="religion">
+                    <label class="control-label col-md-4" for="id">{{ 'Religion.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexReligionSelection!=null?[religionSelections[indexReligionSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="religionSelections" (selected)="userForm.get('religion.id').setValue($event?.id)" (removed)="userForm.get('religion.id').setValue(0)"
+                        placeholder="{{ 'Religion.ChooseReligion' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('religion.id').invalid 
+                                        && (userForm.get('religion.id').touched)">
+                        <span *ngIf="userForm.get('religion.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('religion.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="position">
+                    <label class="control-label col-md-4" for="id">{{ 'Position.Title' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexPositionSelection!=null?[positionSelections[indexPositionSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="positionSelections" (selected)="userForm.get('position.id').setValue($event?.id)" (removed)="userForm.get('position.id').setValue(0)"
+                        placeholder="{{ 'Position.ChoosePosition' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="userForm.get('position.id').invalid 
+                                        && (userForm.get('position.id').touched)">
+                        <span *ngIf="userForm.get('position.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="userForm.get('position.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="address">{{ 'User.Address' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="address" type="text" class="form-control" formControlName="address" placeholder="{{ 'User.Address' | translate }}"
+                      />
+                      <small class="error" *ngIf="userForm.get('address').invalid && (userForm.get('address').touched)">
+                        <span *ngIf="userForm.get('address').errors.required||userForm.get('address').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('address').errors.required&&userForm.get('address').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="phoneNumber">{{ 'User.PhoneNumber' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="phoneNumber" type="text" class="form-control" formControlName="phoneNumber" placeholder="{{ 'User.PhoneNumber' | translate }}"
+                      />
+                      <small class="error" *ngIf="userForm.get('phoneNumber').invalid && (userForm.get('phoneNumber').touched)">
+                        <span *ngIf="userForm.get('phoneNumber').errors.required||userForm.get('phoneNumber').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('phoneNumber').errors.required&&userForm.get('phoneNumber').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="email">{{ 'User.Email' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="email" type="text" class="form-control" formControlName="email" placeholder="{{ 'User.Email' | translate }}" />
+                      <small class="error" *ngIf="userForm.get('email').invalid && (userForm.get('email').touched)">
+                        <span *ngIf="userForm.get('email').errors.required||userForm.get('email').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('email').errors.required&&userForm.get('email').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="identifyCard">{{ 'User.IdentifyCard' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="identifyCard" type="text" class="form-control" formControlName="identifyCard" placeholder="{{ 'User.IdentifyCard' | translate }}" />
+                      <small class="error" *ngIf="userForm.get('identifyCard').invalid && (userForm.get('identifyCard').touched)">
+                        <span *ngIf="userForm.get('identifyCard').errors.required||userForm.get('identifyCard').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!userForm.get('identifyCard').errors.required&&userForm.get('identifyCard').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 100
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="userGender">{{'User.UserGender'|translate}}
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <select class="form-control" formControlName="userGender" autofocus>
+                        <option *ngFor="let userGender of listUserGender" [value]="userGender.id">{{userGender.name}}</option>
+                      </select>
+                      <small class="error" *ngIf="userForm.get('userGender').invalid 
+                                            && (userForm.get('userGender').touched)">
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="userLevel">{{ 'User.UserLevel' | translate }}
+                    </label>
+                    <div class="col-md-8">
+                      <input id="userLevel" type="number" (change)="levelChanged(level.value)" #level min="1" max="10" class="form-control" formControlName="userLevel"
+                        placeholder="{{'User.UserLevel' | translate}}" />
+                      <small class="error" *ngIf="userForm.get('userLevel').invalid 
+                            && (userForm.get('userLevel').touched)">
+                        <span *ngIf="userForm.get('userLevel').errors.required||userForm.get('userLevel').errors.min!=null">
+                          {{ 'Message.NumberInvalid' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6" *ngIf="isUpdate===true">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="accStatus">{{'User.AccStatus'|translate}}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <select class="form-control" formControlName="accStatus" autofocus>
+                        <option *ngFor="let accStatus of listStatus" [value]="accStatus.id">{{accStatus.name}}</option>
+                      </select>
+                      <small class="error" *ngIf="userForm.get('accStatus').invalid 
+                                        && (userForm.get('accStatus').touched)">
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                <button type="button" class="btn default" (click)="goBack()">
+                  <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END EXAMPLE TABLE PORTLET-->
+  </div>
+</div>

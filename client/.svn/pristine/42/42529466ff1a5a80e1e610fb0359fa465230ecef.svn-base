@@ -1,0 +1,227 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { CountryService } from '../country.service';
+import { CountryForm } from '../country-form.component';
+import { Constants } from '../../../../common/util/constants';
+import { Country } from '../country';
+
+@Component({
+  selector: 'app-country-business',
+  templateUrl: './country-business.component.html',
+  providers: [CountryService]
+})
+
+/**
+ * @description: Component management create, update
+ */
+export class CountryBusinessComponent implements OnInit {
+  private sub: any;
+  /**the id of object */
+  id: number;
+  /** the name of business */
+  business: string;
+  /** the form object */
+  countryForm: FormGroup;
+  country: Country;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private countryService: CountryService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.countryForm = CountryForm.countryForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.countryForm, this.id);
+      }
+    });
+  }
+  // isDuplicateCode(thenew) {
+  //   try {
+  //     var old = this.country.countryCode;
+      
+  //     if(old != thenew && old == this.standardized(thenew, type)) {
+  //       return false;
+  //     } else return true;
+  //   } catch(e) {}
+  // }
+  isEqualOld(thenew, type) {
+    try {
+      var old;
+      if(type == "code") {
+        old = this.country.countryCode;
+      } else if(type == "name") {
+        old = this.country.countryName;
+      } else if(type == "english") {
+        old = this.country.englishName;
+      }
+      if(old != thenew && old == this.standardized(thenew, type)) {
+        return false;
+      } else return true;
+    } catch(e) {}
+  }
+  standardized(thenew, type) {
+    thenew = thenew.trim();
+    if(type == "code") {
+      thenew = thenew.split(" ").join("");
+    } else {
+      // console.log('xsa');
+      thenew = thenew.replace(/\s+/g, ' ');
+    }
+    return thenew;
+  }
+  bindingData(countryForm, id) {
+    this.countryService.findOne(id)
+      .then(response => {
+        this.country = JSON.parse(JSON.stringify(response.data));
+        CountryForm.bindingData(countryForm, this.country);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : submit data
+   * @param country : the data
+   */
+  submit(country) {
+    if (this.isUpdate) {
+      console.log(country);
+      debugger
+      this.updateCountry(country);
+    } else {
+      this.createCountry(country);
+    }
+  }
+
+  /**
+   * Creat a new object
+   */
+  private createCountry(country) {
+    this.countryService.create(country)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  /**
+   * Update a object
+   * @param country 
+   */
+  private updateCountry(country) {
+    this.countryService.update(country)
+      .then(response => {
+        
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  /**
+   * Check data is valid
+   */
+  isValidForm() {
+    // check countyr code is valid
+    console.log(this.countryForm.get('countryCode').value);
+    if (this.countryForm.get('countryCode').invalid) {
+      if (this.countryForm.get('countryCode').errors.required) {
+        return false;
+      }
+      if (this.isUpdate === false && this.countryForm.get('countryCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.countryForm.get('countryCode').errors.maxlength != null) {
+        return false;
+      }
+      if (this.countryForm.get('countryCode').value.trim() == '') {
+        return false;
+      }
+    }
+    if(!this.countryForm.get('countryCode').invalid) {
+      if (this.countryForm.get('countryCode').value.trim() == '') {
+        return false;
+      }
+    }
+    // check country name is valid
+    if (this.countryForm.get('countryName').invalid) {
+      if (this.countryForm.get('countryName').errors.required) {
+        return false;
+      }
+      if (this.countryForm.get('countryName').errors.pattern != null) {
+        return false;
+      }
+      if (this.countryForm.get('countryName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check country name is valid
+    if (this.countryForm.get('englishName').invalid) {
+      if (this.countryForm.get('englishName').errors.required) {
+        return false;
+      }
+      if (this.countryForm.get('englishName').errors.pattern != null) {
+        return false;
+      }
+      if (this.countryForm.get('englishName').errors.maxlength != null) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /** 
+   * return to the previous page
+  */
+  goBack() {
+    this.location.back();
+  }
+}

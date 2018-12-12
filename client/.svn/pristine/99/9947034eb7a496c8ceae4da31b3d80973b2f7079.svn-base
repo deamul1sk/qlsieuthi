@@ -1,0 +1,49 @@
+
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { ProvinceService } from '../province.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { Province } from '../province';
+
+
+@Component({
+  selector: 'app-province-detail',
+  templateUrl: './province-detail.component.html',
+  providers: [ProvinceService]
+})
+
+/**
+ * @description: Component management show detail
+ */
+export class ProvinceDetailComponent implements OnInit {
+  private sub: any;
+  id: number;
+  province: Province;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private provinceService: ProvinceService,
+    public vcr: ViewContainerRef
+  ) {}
+
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.provinceService.findOne(this.id)
+      .then(response => {
+        this.province = response.data;
+      })
+      .catch(error =>{
+        console.log("errors: " + error);
+      })
+    });
+  }
+  goBack() {
+    this.location.back();
+  }
+
+}

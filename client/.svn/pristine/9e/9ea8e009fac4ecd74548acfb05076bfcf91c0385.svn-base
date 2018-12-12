@@ -1,0 +1,152 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { ReligionService } from '../religion.service';
+import { ReligionForm } from '../religion-form.component';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-religion-business',
+  templateUrl: './religion-business.component.html',
+  providers: [ReligionService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class ReligionBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  religionForm: FormGroup;
+  religion: any;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private religionService: ReligionService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.religionForm = ReligionForm.religionForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.religionForm, this.id);
+      }
+    });
+  }
+
+  bindingData(religionForm, id) {
+    this.religionService.findOne(id)
+      .then(response => {
+        this.religion = response.data;
+        ReligionForm.bindingData(religionForm, this.religion);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param religion : truyền object cần chỉnh sửa.
+   */
+  submit(religion) {
+    if (this.isUpdate) {
+      this.updateReligion(religion);
+    } else {
+      this.createReligion(religion);
+    }
+  }
+
+  createReligion(religion) {
+    this.religionService.create(religion)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateReligion(religion) {
+    this.religionService.update(religion)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.religionForm.get('religionCode').invalid) {
+      if (this.religionForm.get('religionCode').errors.required) {
+        return false;
+      }
+      if (this.religionForm.get('religionCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.religionForm.get('religionCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check religion name is valid
+    if (this.religionForm.get('religionName').invalid) {
+      if (this.religionForm.get('religionName').errors.required) {
+        return false;
+      }
+      if (this.religionForm.get('religionName').errors.pattern != null) {
+        return false;
+      }
+      if (this.religionForm.get('religionName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

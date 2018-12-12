@@ -1,0 +1,149 @@
+<div class="row">
+  <div class="col-md-12">
+    <!-- BEGIN EXAMPLE TABLE PORTLET-->
+    <div class="portlet box grey-cascade">
+      <div class="portlet-title">
+        <div class="caption" *ngIf="isUpdate===true">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.District' | translate }} > {{ 'Action.Update' | translate
+          }}
+        </div>
+        <div class="caption" *ngIf="isUpdate===false">
+          <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.District' | translate }} > {{ 'Action.Create' | translate
+          }}
+        </div>
+      </div>
+      <div class="portlet-body">
+        <div class="row">
+          <div class="col-md-12">
+            <form class="form-horizontal align-middle" [formGroup]="districtForm" (ngSubmit)="submit(districtForm.value)">
+              <div class="row">
+                <div class="col-md-6">
+                  <input id="id" type="hidden" class="form-control" formControlName="id" />
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="districtCode">{{ 'District.DistrictCode' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="districtCode" type="text" ng-trim="true" class="form-control" formControlName="districtCode" placeholder="{{ 'District.DistrictCode' | translate }}"
+                      />
+                      <small class="error" *ngIf="districtForm.get('districtCode').invalid && (districtForm.get('districtCode').touched)">
+                        <span *ngIf="districtForm.get('districtCode').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!districtForm.get('districtCode').errors.required&&districtForm.get('districtCode').errors.pattern!=null">
+                          {{ 'Message.CodeInvalid' | translate }}
+                        </span>
+                        <span *ngIf="!districtForm.get('districtCode').errors.required&&districtForm.get('districtCode').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 10
+                        </span>
+                      </small>
+                      <small class="error" *ngIf="!districtForm.get('districtCode').invalid && (districtForm.get('districtCode').touched)">
+                        <span *ngIf="districtForm.get('districtCode').value.trim() == ''">
+                            {{ 'Message.CodeInvalid' | translate }}
+                        </span>
+                        <span *ngIf="isUpdate===true && !isEqualOld(districtForm.get('districtCode').value, 'code')">
+                            Giong voi cai cu
+                        </span>
+                    </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="districtName">{{ 'District.DistrictName' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="districtName" type="text" class="form-control" formControlName="districtName" placeholder="{{ 'District.DistrictName' | translate }}"
+                      />
+                      <small class="error" *ngIf="districtForm.get('districtName').invalid && (districtForm.get('districtName').touched)">
+                        <span *ngIf="districtForm.get('districtName').errors.required||districtForm.get('districtName').errors.pattern!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="!districtForm.get('districtName').errors.required&&districtForm.get('districtName').errors.maxlength!=null">
+                          {{ 'Message.MaxLength' | translate }} 150
+                        </span>
+                      </small>
+                      <small class="error" *ngIf="!districtForm.get('districtName').invalid && (districtForm.get('districtName').touched)">
+                        <span *ngIf="isUpdate===true && !isEqualOld(districtForm.get('districtName').value, 'name')">
+                            Giong voi cai cu
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group" formGroupName="province">
+                    <label class="control-label col-md-4" for="id">{{ 'Province.Title' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <ng-select [active]="indexProvinceSelection!=null?[provinceSelections[indexProvinceSelection]]:''" [allowClear]="true" [disabled]="disabled"
+                        [items]="provinceSelections" (selected)="districtForm.get('province.id').setValue($event?.id)" (removed)="districtForm.get('province.id').setValue(0)"
+                        placeholder="{{ 'Province.ChooseProvince' | translate }}" ngDefaultControl>
+                      </ng-select>
+                      <small class="error" *ngIf="districtForm.get('province.id').invalid 
+                                    && (districtForm.get('province.id').touched)">
+                        <span *ngIf="districtForm.get('province.id').errors.required">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                        <span *ngIf="districtForm.get('province.id').errors.min!=null">
+                          {{ 'Message.Required' | translate }}
+                        </span>
+                      </small>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="countNumber">{{ 'District.CountNumber' | translate }}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input id="countNumber" type="number" class="form-control" formControlName="countNumber" placeholder="{{'District.CountNumber' | translate}}"
+                      />
+                      <small class="error" *ngIf="districtForm.get('countNumber').invalid 
+                          && (districtForm.get('countNumber').touched)">
+                        <span *ngIf="districtForm.get('countNumber').errors.min!=null">
+                          {{ 'Message.NumberInvalid' | translate }}
+                        </span>
+                      </small>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6" *ngIf="isUpdate===true">
+                  <div class="form-group">
+                    <label class="control-label col-md-4" for="status">{{'District.Status'|translate}}
+                      <span style="color:red;"> *</span>
+                    </label>
+                    <div class="col-md-8">
+                      <input type="hidden" required>
+                      <select class="form-control" formControlName="status" autofocus>
+                        <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                      </select>
+                      <small class="error" *ngIf="districtForm.get('status').invalid 
+                                    && (districtForm.get('status').touched)">
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                <button type="button" class="btn default" (click)="goBack()">
+                  <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END EXAMPLE TABLE PORTLET-->
+  </div>
+</div>

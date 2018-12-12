@@ -1,0 +1,93 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet box grey-cascade">
+            <div class="portlet-title">
+                <div class="caption" *ngIf="isUpdate===true">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.ReportForm' | translate }} > {{ 'Action.Update'
+                    | translate }}
+                </div>
+                <div class="caption" *ngIf="isUpdate===false">
+                    <i class="fa fa-globe"></i>{{ 'SIDEBAR.Directory' | translate }} > {{ 'SIDEBAR.ReportForm' | translate }} > {{ 'Action.Create'
+                    | translate }}
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form class="form-horizontal align-middle" [formGroup]="reportFormForm" (ngSubmit)="submit(reportFormForm.value)">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="id" type="hidden" class="form-control" formControlName="id" />
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="reportFormCode">{{ 'ReportForm.ReportFormCode' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="reportFormCode" type="text" ng-trim="true" class="form-control" formControlName="reportFormCode" placeholder="{{ 'ReportForm.ReportFormCode' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="reportFormForm.get('reportFormCode').invalid && (reportFormForm.get('reportFormCode').touched)">
+                                                <span *ngIf="reportFormForm.get('reportFormCode').errors.required">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!reportFormForm.get('reportFormCode').errors.required&&reportFormForm.get('reportFormCode').errors.pattern!=null">
+                                                    {{ 'Message.CodeInvalid' | translate }}
+                                                </span>
+                                                <span *ngIf="!reportFormForm.get('reportFormCode').errors.required&&reportFormForm.get('reportFormCode').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 20
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="reportFormName">{{ 'ReportForm.ReportFormName' | translate }}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input id="reportFormName" type="text" class="form-control" formControlName="reportFormName" placeholder="{{ 'ReportForm.ReportFormName' | translate }}"
+                                            />
+                                            <small class="error" *ngIf="reportFormForm.get('reportFormName').invalid && (reportFormForm.get('reportFormName').touched)">
+                                                <span *ngIf="reportFormForm.get('reportFormName').errors.required||reportFormForm.get('reportFormName').errors.pattern!=null">
+                                                    {{ 'Message.Required' | translate }}
+                                                </span>
+                                                <span *ngIf="!reportFormForm.get('reportFormName').errors.required&&reportFormForm.get('reportFormName').errors.maxlength!=null">
+                                                    {{ 'Message.MaxLength' | translate }} 150
+                                                </span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6" *ngIf="isUpdate===true">
+                                    <div class="form-group">
+                                        <label class="control-label col-md-4" for="status">{{'ReportForm.Status'|translate}}
+                                            <span style="color:red;"> *</span>
+                                        </label>
+                                        <div class="col-md-8">
+                                            <input type="hidden" required>
+                                            <select class="form-control" formControlName="status" autofocus>
+                                                <option *ngFor="let status of listStatus" [value]="status.id">{{status.name}}</option>
+                                            </select>
+                                            <small class="error" *ngIf="reportFormForm.get('status').invalid 
+                                  && (reportFormForm.get('status').touched)">
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" [disabled]="!isValidForm()">{{ 'Action.Save' | translate }}</button>
+                                <button type="button" class="btn default" (click)="goBack()">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>{{ 'Action.Back' | translate }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

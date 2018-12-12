@@ -1,0 +1,230 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { ProvinceService } from '../province.service';
+import { ProvinceForm } from '../province-form.component';
+import { Country } from '../../country/country';
+import { CountryService } from '../../country/country.service';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-province-business',
+  templateUrl: './province-business.component.html',
+  providers: [ProvinceService, CountryService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class ProvinceBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  provinceForm: FormGroup;
+  province: any;
+
+  isUpdate: boolean = true;
+
+  listCountry: Country[];
+  countrySelections: Array<any> = [];
+  indexCountrySelection: number;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private provinceService: ProvinceService,
+    private countryService: CountryService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // get id of object from @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.provinceForm = ProvinceForm.provinceForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.provinceForm.patchValue({
+          country: {
+            id: 1,
+          }
+        });
+        this.isUpdate = false;
+        this.getListCountry();
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.provinceForm, this.id);
+      }
+    });
+  }
+
+  bindingData(provinceForm, id) {
+    this.provinceService.findOne(id)
+      .then(response => {
+        this.province = response.data;
+        this.getListCountry();
+        ProvinceForm.bindingData(provinceForm, this.province);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : submit data
+   * @param province : the infomation of object
+   */
+  submit(province) {
+    if (this.isUpdate) {
+      this.updateProvince(province);
+    } else {
+      this.createProvince(province);
+    }
+  }
+
+  /**
+   * @description create new object
+   * @param province the infomation of object
+   */
+  createProvince(province) {
+    this.provinceService.create(province)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  /**
+   * @description update object
+   * @param province the infomation of object
+   */
+  updateProvince(province) {
+    this.provinceService.update(province)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  /**
+   * @description check data is valid
+   */
+  isValidForm() {
+    // check countyr code is valid
+    if (this.provinceForm.get('provinceCode').invalid) {
+      if (this.provinceForm.get('provinceCode').errors.required) {
+        return false;
+      }
+      if (this.provinceForm.get('provinceCode').errors.pattern != null) {
+        return false;
+      }
+      if (this.provinceForm.get('provinceCode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check province name is valid
+    if (this.provinceForm.get('provinceName').invalid) {
+      if (this.provinceForm.get('provinceName').errors.required) {
+        return false;
+      }
+      if (this.provinceForm.get('provinceName').errors.pattern != null) {
+        return false;
+      }
+      if (this.provinceForm.get('provinceName').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check country is valid
+    if (this.provinceForm.get('country.id').invalid) {
+      if (this.provinceForm.get('country.id').errors.required) {
+        return false;
+      }
+      if (this.provinceForm.get('country.id').errors.min != null) {
+        return false;
+      }
+    }
+    // check country is valid
+    if (this.provinceForm.get('countNumber').invalid) {
+      if (this.provinceForm.get('countNumber').errors.min != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @description get list country
+   */
+  private getListCountry() {
+    this.countryService.getListCountry()
+      .then(response => {
+        this.listCountry = response.data;
+        this.initializeCountrySelection();
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  /**
+   * @description initialize country selection
+   */
+  private initializeCountrySelection() {
+    let country_datas = [];
+    var countItems = 0;
+    if (this.listCountry != null && this.listCountry != undefined) {
+      this.listCountry.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.countryName;
+        item.id = element.id;
+        country_datas.push(item);
+        if (this.province != undefined && this.province != null && item.id == this.province.country.id) {
+          this.indexCountrySelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.countrySelections = country_datas;
+    console.log(this.countrySelections);
+
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

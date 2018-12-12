@@ -1,0 +1,50 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Position } from './position';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class PositionForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static positionForm(fb: FormBuilder, business: string): FormGroup {
+        var positionForm: FormGroup;
+        
+        positionForm = fb.group({
+            id: "",
+            positionCode: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            positionName: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(100),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            status: ["", Validators.compose([
+                Validators.required
+            ])],
+        });
+        return positionForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param position : đối tượng đích
+     */
+    static bindingData(positionForm: FormGroup, position: Position) {
+        debugger;
+        positionForm.setValue({
+            id: position.id,
+            positionCode: position.positionCode,
+            positionName: position.positionName,
+            status: position.status
+        });
+    }
+}

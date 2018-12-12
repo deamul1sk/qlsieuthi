@@ -1,0 +1,163 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { TTHCService } from '../tthc.service';
+import { TTHCForm } from '../tthc-form.component';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-tthc-business',
+  templateUrl: './tthc-business.component.html',
+  providers: [TTHCService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class TTHCBusinessComponent implements OnInit {
+  private sub: any;
+  id: number;
+  business: string;
+  tthcForm: FormGroup;
+  tthc: any;
+
+  isUpdate: boolean = true;
+
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private tthcService: TTHCService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'id' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.business = params['business'];
+      this.tthcForm = TTHCForm.tthcForm(this.fb, this.business);
+      if (this.business == 'create') {
+        this.isUpdate = false;
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.tthcForm, this.id);
+      }
+    });
+  }
+
+  bindingData(tthcForm, id) {
+    this.tthcService.findOne(id)
+      .then(response => {
+        this.tthc = response.data;
+        TTHCForm.bindingData(tthcForm, this.tthc);
+      })
+      .catch(error => console.log("errors: " + error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param tthc : truyền object cần chỉnh sửa.
+   */
+  submit(tthc) {
+    if (this.isUpdate) {
+      this.updateTTHC(tthc);
+    } else {
+      this.createTTHC(tthc);
+    }
+  }
+
+  createTTHC(tthc) {
+    this.tthcService.create(tthc)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateTTHC(tthc) {
+    this.tthcService.update(tthc)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.tthcForm.get('code').invalid) {
+      if (this.tthcForm.get('code').errors.required) {
+        return false;
+      }
+      if (this.tthcForm.get('code').errors.pattern != null) {
+        return false;
+      }
+      if (this.tthcForm.get('code').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check tthc name is valid
+    if (this.tthcForm.get('name').invalid) {
+      if (this.tthcForm.get('name').errors.required) {
+        return false;
+      }
+      if (this.tthcForm.get('name').errors.pattern != null) {
+        return false;
+      }
+      if (this.tthcForm.get('name').errors.maxlength != null) {
+        return false;
+      }
+    }
+    if (true) {
+      if(this.tthcForm.get('no').value == null) {
+        return false;
+      }
+
+      if(this.tthcForm.get('no').value < 0) {
+        return false;
+      }
+    }
+    
+    
+    return true;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

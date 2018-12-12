@@ -1,0 +1,123 @@
+<!-- BEGIN SIDEBAR -->
+<ul class="page-sidebar-menu  page-header-fixed page-sidebar-menu-light " data-keep-expanded="false" data-auto-scroll="true"
+ data-slide-speed="200" style="padding-top: 20px">
+	<!-- DOC: To remove the sidebar toggler from the sidebar you just need to completely remove the below "sidebar-toggler-wrapper" LI element -->
+	<!-- BEGIN SIDEBAR TOGGLER BUTTON -->
+	<li class="sidebar-toggler-wrapper hide">
+		<div class="sidebar-toggler">
+			<span></span>
+		</div>
+	</li>
+	<ng-container>
+		<li class="nav-item">
+			<a href="javascript:;" class="nav-link nav-toggle">
+				<i class="fa fa-angle-right" aria-hidden="true"></i>
+				<span class="title">{{ 'SIDEBAR.Title' | translate }}</span>
+				<span class="arrow "></span>
+			</a>
+			<ul class="sub-menu">
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/country">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Country.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/province">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Province.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/district">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'District.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/ward">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Ward.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/reportTarget">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'ReportTarget.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/organization">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Organization.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/linhvuckt">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Linhvuckt.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/dmdvkiemtoan">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Dmdvkiemtoan.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/currency">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Currency.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/department">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Department.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/nation">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Nation.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/position">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Position.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/tthc">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'TTHC.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/linhvuctthc">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'LinhVucTTHC.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/religion">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'Religion.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/reportForm">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'ReportForm.Title' | translate }}</a>
+				</li>
+			</ul>
+		</li>
+		<li class="nav-item">
+			<a href="javascript:;" class="nav-link nav-toggle">
+				<i class="fa fa-angle-right" aria-hidden="true"></i>
+				<span class="title">{{ 'SIDEBAR.UserMannager' | translate }}</span>
+				<span class="arrow "></span>
+			</a>
+			<ul class="sub-menu">
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/user">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'User.Title' | translate }}</a>
+				</li>
+				<li class="nav-item" routerLinkActive="active open">
+					<a routerLink="/groupUser">
+						<i class="fa fa-angle-right" aria-hidden="true"></i>
+						{{ 'GroupUser.Title' | translate }}</a>
+				</li>
+			</ul>
+		</li>
+	</ng-container>
+
+</ul>
+<!-- END SIDEBAR MENU -->

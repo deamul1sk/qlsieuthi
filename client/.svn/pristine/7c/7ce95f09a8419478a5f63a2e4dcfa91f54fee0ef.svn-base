@@ -1,0 +1,49 @@
+
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { CurrencyService } from '../currency.service';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { Currency } from '../currency';
+
+
+@Component({
+  selector: 'app-currency-detail',
+  templateUrl: './currency-detail.component.html',
+  providers: [CurrencyService]
+})
+
+/**
+ * @description: Component management show detail
+ */
+export class CurrencyDetailComponent implements OnInit {
+  private sub: any;
+  id: number;
+  currency: Currency;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private currencyService: CurrencyService,
+    public vcr: ViewContainerRef
+  ) {}
+
+  ngOnInit() {
+    this.sub = this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.currencyService.findOne(this.id)
+      .then(response => {
+        this.currency = response.data;
+      })
+      .catch(error =>{
+        console.log("errors: " + error);
+      })
+    });
+  }
+  goBack() {
+    this.location.back();
+  }
+
+}

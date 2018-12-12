@@ -1,0 +1,670 @@
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { ToastsManager } from 'ng2-toastr/ng2-toastr';
+import { Toast } from 'ng2-toastr';
+import { TranslateService } from '@ngx-translate/core';
+import { browser } from 'protractor';
+import { UserService } from '../user.service';
+import { UserForm } from '../user-form.component';
+// import { Constants } from '../../../../common/util/constants';
+import { Observable } from 'rxjs';
+import { User } from '../user';
+import { DistrictService } from '../../../categories/district/district.service';
+import { ProvinceService } from '../../../categories/province/province.service';
+import { WardService } from '../../../categories/ward/ward.service';
+import { NationService } from '../../../categories/nation/nation.service';
+import { OrganizationService } from '../../../categories/organization/organization.service';
+import { Province } from '../../../categories/province/Province';
+import { District } from '../../../categories/district/district';
+import { Ward } from '../../../categories/ward/ward';
+import { Nation } from '../../../categories/nation/nation';
+import { Organization } from '../../../categories/organization/organization';
+import { Religion } from '../../../categories/religion/religion';
+import { PositionService } from '../../../categories/position/position.service';
+import { ReligionService } from '../../../categories/religion/religion.service';
+import { Position } from '../../../categories/position/position';
+import { UserGender } from '../userGender';
+import { Constants } from '../../../../common/util/constants';
+
+@Component({
+  selector: 'app-user-business',
+  templateUrl: './user-business.component.html',
+  providers: [UserService, DistrictService, ProvinceService,
+    WardService, NationService, OrganizationService, PositionService, ReligionService]
+})
+
+/**
+ * @description: Component quản lý việc chỉnh sửa.
+ */
+export class UserBusinessComponent implements OnInit {
+  private sub: any;
+  username: number;
+  business: string;
+  userForm: FormGroup;
+  user: User;
+
+  isUpdate: boolean = true;
+
+  listProvince: Province[];
+  provinceSelections: Array<any> = [];
+  indexProvinceSelection: number;
+
+  listDistrict: District[];
+  districtSelections: Array<any> = [];
+  indexDistrictSelection: number;
+
+  listWard: Ward[];
+  wardSelections: Array<any> = [];
+  indexWardSelection: number;
+
+  listNation: Nation[];
+  nationSelections: Array<any> = [];
+  indexNationSelection: number;
+
+  listPosition: Position[];
+  positionSelections: Array<any> = [];
+  indexPositionSelection: number;
+
+  listReligion: Religion[];
+  religionSelections: Array<any> = [];
+  indexReligionSelection: number;
+
+  listOrganization: Organization[];
+  organizationSelections: Array<any> = [];
+  indexOrganizationSelection: number;
+
+  
+  userGenderSelections: Array<any> = [];
+  indexUserGenderSelection: number;
+
+  listUserGender = Constants.GENDER_LIST
+  
+  listStatus = Constants.STATUS_LIST;
+
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private userService: UserService,
+    private districtService: DistrictService,
+    private provinceService: ProvinceService,
+    private wardService: WardService,
+    private nationService: NationService,
+    private positionService: PositionService,
+    private religionService: ReligionService,
+    private organizationService: OrganizationService,
+    private fb: FormBuilder,
+    private translate: TranslateService,
+    public toastr: ToastsManager, vcr: ViewContainerRef
+  ) {
+    this.toastr.setRootViewContainerRef(vcr);
+  }
+
+  ngOnInit() {
+    // Lấy bản ghi theo 'username' từ @PathParam
+    this.sub = this.route.params.subscribe(params => {
+      this.username = params['username'];
+      this.business = params['business'];
+      this.userForm = UserForm.userForm(this.fb, this.business);
+
+      if (this.business == 'create') {
+        this.userForm.patchValue({
+          userLevel: '0',
+        });
+        this.isUpdate = false;
+        this.getListProvince();
+        this.getListNation();
+        this.getListPosition();
+        this.getListReligion();
+        this.getListOrganization();
+        // this.getListUserGender();
+      }
+      if (this.business == 'update') {
+        this.isUpdate = true;
+        this.bindingData(this.userForm, this.username);
+      }
+    });
+  }
+
+  bindingData(userForm, username) {
+    this.userService.findByUsername(username)
+      .then(response => {
+        console.log(JSON.parse(JSON.stringify(response.data)));
+        this.user = JSON.parse(JSON.stringify(response.data));
+        this.getListProvince();
+        this.getListNation();
+        this.getListPosition();
+        this.getListReligion();
+        // this.getListUserGender();
+        this.getListOrganization();
+        
+        UserForm.bindingData(userForm, this.user);
+      })
+      .catch(error => console.log(error));
+  }
+
+  /**
+   * @description : Hàm gọi Update
+   * @param user : truyền object cần chỉnh sửa.
+   */
+  submit(user) {
+    if (this.isUpdate) {
+      this.updateUser(user);
+    } else {
+      this.createUser(user);
+    }
+  }
+
+  createUser(user) {
+    console.log(user.province.name);
+    this.userService.create(user)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.CreateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  updateUser(user) {
+    this.userService.update(user)
+      .then(response => {
+        this.goBack();
+      })
+      .catch(error => {
+        let message;
+        this.translate.get('Message.UpdateFail').subscribe((res: string) => {
+          message = res;
+        });
+        this.toastr.error('', message, { dismiss: 'controlled' })
+          .then((toast: Toast) => {
+            setTimeout(() => {
+              this.toastr.dismissToast(toast);
+            }, 3000);
+          });
+      });
+  }
+
+  isEqualOld(thenew, type) {
+    try {
+      var old;
+      if(type == "code") {
+        old = this.user.usercode;
+      } else if(type == "username") {
+        old = this.user.username;
+      }
+      if(old != thenew && old == this.standardized(thenew, type)) {
+        return false;
+      } else return true;
+    } catch(e) {}
+  }
+  standardized(thenew, type) {
+    thenew = thenew.trim();
+    if(type == "code") {
+      thenew = thenew.split(" ").join("");
+    } else {
+      thenew = thenew.replace(/\s+/g, ' ');
+    }
+    return thenew;
+  }
+
+  isValidForm() {
+    // check countyr code is valid
+    if (this.userForm.get('usercode').invalid) {
+      if (this.userForm.get('usercode').errors.required) {
+        return false;
+      }
+      if (this.userForm.get('usercode').errors.pattern != null) {
+        return false;
+      }
+      if (this.userForm.get('usercode').errors.maxlength != null) {
+        return false;
+      }
+    }
+    if(!this.userForm.get('usercode').invalid) {
+      if (this.userForm.get('usercode').value.trim() == '') {
+        return false;
+      }
+    }
+    // check user name is valid
+    if (this.userForm.get('username').invalid) {
+      if (this.userForm.get('username').errors.required) {
+        return false;
+      }
+      if (this.userForm.get('username').errors.pattern != null) {
+        return false;
+      }
+      if (this.userForm.get('username').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check organization is valid
+    if (this.userForm.get('organization.id').invalid) {
+      if (this.userForm.get('organization.id').errors.required) {
+        return false;
+      }
+      if (this.userForm.get('organization.id').errors.min != null) {
+        return false;
+      }
+    }
+    // check address is valid
+    if (this.userForm.get('address').invalid) {
+      if (this.userForm.get('address').errors.pattern != null) {
+        return false;
+      }
+      if (this.userForm.get('address').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check phone number is valid
+    if (this.userForm.get('phoneNumber').invalid) {
+      if (this.userForm.get('phoneNumber').errors.pattern != null) {
+        return false;
+      }
+      if (this.userForm.get('phoneNumber').errors.maxlength != null) {
+        return false;
+      }
+    }
+    // check email is valid
+    if (this.userForm.get('email').invalid) {
+      if (this.userForm.get('email').errors.pattern != null) {
+        return false;
+      }
+      if (this.userForm.get('email').errors.maxlength != null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private getListDistrict() {
+    this.districtService.getListDistrict()
+      .then(response => {
+        this.listDistrict = response.data;
+        if (this.user != undefined && this.user != null && 
+          this.user.district != undefined && this.user.district != null) {
+            this.initializeDistrictSelection(this.user.district.id);
+        } else {
+          this.initializeDistrictSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private getListDistrictByProvinceId(id: number) {
+    this.districtService.getListDistrictByProvinceId(id)
+      .then(response => {
+        this.listDistrict = response.data;
+        if (this.user != undefined && this.user != null) {
+          if (this.user.district != undefined && this.user.district != null) {
+            this.initializeDistrictSelection(this.user.district.id);
+            this.getListWardByDistrictId(this.user.district.id);
+          }
+        } else {
+          this.initializeDistrictSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeDistrictSelection(selectItem: number) {
+    let district_datas = [];
+    var countItems = 0;
+    if (this.listDistrict != null && this.listDistrict != undefined) {
+      this.indexDistrictSelection = null;
+      this.listDistrict.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.districtName;
+        item.id = element.id;
+        district_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexDistrictSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.districtSelections = district_datas;
+  }
+
+  districtChanged(id: number) {
+    this.userForm.get('district.id').setValue(id);
+    this.getListWardByDistrictId(id);
+  }
+
+  private getListProvince() {
+    this.provinceService.getListProvince()
+      .then(response => {
+        this.listProvince = response.data;
+        if (this.user != undefined && this.user != null &&
+          this.user.province != undefined && this.user.province != null) {
+            this.initializeProvinceSelection(this.user.province.id);
+            this.getListDistrictByProvinceId(this.user.province.id);
+        } else {
+          this.initializeProvinceSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeProvinceSelection(selectItem: number) {
+    let province_datas = [];
+    var countItems = 0;
+    if (this.listProvince != null && this.listProvince != undefined) {
+      this.indexProvinceSelection = null;
+      this.listProvince.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.provinceName;
+        item.id = element.id;
+        province_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexProvinceSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    
+    this.provinceSelections = province_datas;
+  }
+
+  provinceChanged(id: number) {
+    this.userForm.get('province.id').setValue(id);
+    this.getListDistrictByProvinceId(id);
+    // this.getListWardByProvinceId(id);
+  }
+
+  private getListPosition() {
+    this.positionService.getListPosition()
+      .then(response => {
+        this.listPosition = response.data;
+        if (this.user != undefined && this.user != null && 
+          this.user.position != undefined && this.user.position != null) {
+            this.initializePositionSelection(this.user.position.id);
+        } else {
+          this.initializePositionSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializePositionSelection(selectItem: number) {
+    let position_datas = [];
+    var countItems = 0;
+    if (this.listPosition != null && this.listPosition != undefined) {
+      this.indexPositionSelection = null;
+      this.listPosition.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.positionName;
+        item.id = element.id;
+        position_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexPositionSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    
+    this.positionSelections = position_datas;
+  }
+
+  positionChanged(id: number) {
+    this.userForm.get('position.id').setValue(id);
+    // this.getListDistrictByProvinceId(id);
+    // this.getListWardByProvinceId(id);
+  }
+
+  // private getListUserGender() {
+  //   this.listUserGender.push(new UserGender("Male", "Male"));
+  //   this.listUserGender.push(new UserGender("Female", "Female"));
+  //   this.listUserGender.push(new UserGender("Gay", "Gay"));
+  //   this.listUserGender.push(new UserGender("Lesbian", "Lesbian"));
+  
+  //   if (this.user != undefined && this.user != null && 
+  //     this.user.userGender != undefined && this.user.userGender != null && this.user.userGender != "") {
+  //       console.log(this.user.userGender);
+  //       this.initializeUserGenderSelection(this.user.userGender);
+  //   } else {
+  //     this.initializeUserGenderSelection("Male");
+  //   }
+  // }
+
+  // private initializeUserGenderSelection(selectItem: string) {
+
+  //   let userGender_datas = [];
+  //   var countItems = 0;
+  //   if (this.listUserGender != null && this.listUserGender != undefined) {
+  //     this.indexUserGenderSelection = null;
+  //     this.listUserGender.forEach(element => {
+  //       var item = {
+  //         id: null, text: null
+  //       };
+  //       item.text = element.name;
+  //       item.id = element.id;
+  //       userGender_datas.push(item);
+  //       if (item.id == selectItem) {
+  //         this.indexUserGenderSelection = countItems;
+  //       }
+  //       countItems += 1;
+  //     });
+  //   }
+    
+  //   this.userGenderSelections = userGender_datas;
+  // }
+
+  // userGenderChanged(id: number) {
+  //   this.userForm.get('userGender.id').setValue(id);
+  //   // this.getListDistrictByProvinceId(id);
+  //   // this.getListWardByProvinceId(id);
+  // }
+
+  //
+  private getListReligion() {
+    this.religionService.getListReligion()
+      .then(response => {
+        this.listReligion = response.data;
+        if (this.user != undefined && this.user != null) {
+          if (this.user.religion != undefined && this.user.religion != null) {
+            this.initializeReligionSelection(this.user.religion.id);
+          }
+        } else {
+          this.initializeReligionSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeReligionSelection(selectItem: number) {
+    let religion_datas = [];
+    var countItems = 0;
+    if (this.listReligion != null && this.listReligion != undefined) {
+      this.indexReligionSelection = null;
+      this.listReligion.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.religionName;
+        item.id = element.id;
+        religion_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexReligionSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    
+    this.religionSelections = religion_datas;
+  }
+
+  religionChanged(id: number) {
+    this.userForm.get('religion.id').setValue(id);
+    // this.getListDistrictByProvinceId(id);
+    // this.getListWardByProvinceId(id);
+  }
+  //
+
+
+  private getListWard() {
+    this.wardService.getListWard()
+      .then(response => {
+        this.listWard = response.data;
+        if (this.user != undefined && this.user != null) {
+          if (this.user.ward != undefined && this.user.ward != null) {
+            this.initializeWardSelection(this.user.ward.id);
+          }
+        } else {
+          this.initializeWardSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private getListWardByProvinceId(id: number) {
+    this.wardService.getListWardByProvinceId(id)
+      .then(response => {
+        this.listWard = response.data;
+        this.initializeWardSelection(0);
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private getListWardByDistrictId(id: number) {
+    this.wardService.getListWardByDistrictId(id)
+      .then(response => {
+        this.listWard = response.data;
+        if (this.user != undefined && this.user != null) {
+          if (this.user.ward != undefined && this.user.ward != null) {
+            this.initializeWardSelection(this.user.ward.id);
+          }
+        } else {
+          this.initializeWardSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeWardSelection(selectItem: number) {
+    let ward_datas = [];
+    var countItems = 0;
+    if (this.listWard != null && this.listWard != undefined) {
+      this.indexWardSelection = null;
+      this.listWard.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.wardName;
+        item.id = element.id;
+        ward_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexWardSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.wardSelections = ward_datas;
+  }
+
+  wardChanged(id: number) {
+    this.userForm.get('ward.id').setValue(id);
+  }
+
+  private getListNation() {
+    this.nationService.getListNation()
+      .then(response => {
+        this.listNation = response.data;
+        if (this.user != undefined && this.user != null) {
+          if (this.user.nation != undefined && this.user.nation != null) {
+            this.initializeNationSelection(this.user.nation.id);
+          }
+        } else {
+          this.initializeNationSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeNationSelection(selectItem: number) {
+    let nation_datas = [];
+    var countItems = 0;
+    if (this.listNation != null && this.listNation != undefined) {
+      this.listNation.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.nationName;
+        item.id = element.id;
+        nation_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexNationSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.nationSelections = nation_datas;
+  }
+
+  private getListOrganization() {
+    this.organizationService.getListOrganization()
+      .then(response => {
+        this.listOrganization = response.data;
+        if (this.user != undefined && this.user != null) {
+          if (this.user.organization != undefined && this.user.organization != null) {
+            this.initializeOrganizationSelection(this.user.organization.id);
+          }
+        } else {
+          this.initializeOrganizationSelection(0);
+        }
+      }).catch(error => {
+        console.log(error);
+      });
+  }
+
+  private initializeOrganizationSelection(selectItem: number) {
+    let organization_datas = [];
+    var countItems = 0;
+    if (this.listOrganization != null && this.listOrganization != undefined) {
+      this.listOrganization.forEach(element => {
+        var item = {
+          id: null, text: null
+        };
+        item.text = element.organizationName;
+        item.id = element.id;
+        organization_datas.push(item);
+        if (item.id == selectItem) {
+          this.indexOrganizationSelection = countItems;
+        }
+        countItems += 1;
+      });
+    }
+    this.organizationSelections = organization_datas;
+  }
+
+  goBack() {
+    this.location.back();
+  }
+}

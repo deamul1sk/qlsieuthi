@@ -1,0 +1,62 @@
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Constants } from '../../../common/util/constants';
+import { Position } from './position';
+
+/**
+ * @target: Dùng để định nghĩa forms: tạo, sửa, chi tiết
+ */
+export class PositionForm {
+    /**
+     * @description Định nghĩa form tạo
+     * @param fb 
+     */
+    static positionForm(fb: FormBuilder, business: string): FormGroup {
+        var positionForm: FormGroup;
+        
+        positionForm = fb.group({
+            id: "",
+            code: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(10),
+                Validators.pattern(Constants.CODE_PATTERN)
+            ])],
+            name: ["", Validators.compose([
+                Validators.required,
+                Validators.maxLength(256),
+                Validators.pattern(Constants.NAME_PATTERN)
+            ])],
+            abbreviation: ["", Validators.compose([
+                Validators.maxLength(256)
+            ])],
+            no: [0, Validators.compose([
+                Validators.maxLength(10)
+            ])],
+            description: ["", Validators.compose([
+                Validators.maxLength(1024)
+            ])],
+            status: [1, Validators.compose([
+                Validators.required,
+                Validators.maxLength(10)
+            ])],
+        });
+        return positionForm;
+    }
+
+    // 
+    /**
+     * @description : Đặt giá trị cho form Update
+     * @param updateForm : form Update cần set giá trị
+     * @param position : đối tượng đích
+     */
+    static bindingData(positionForm: FormGroup, position: Position) {
+        positionForm.setValue({
+            id: position.id,
+            code: position.code,
+            name: position.name,
+            abbreviation: position.abbreviation,
+            no: position.no,
+            description: position.description,
+            status: position.status,
+        });
+    }
+}
